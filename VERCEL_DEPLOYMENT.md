@@ -39,6 +39,7 @@ vercel login
 **Framework Preset:** Next.js (auto-detected)
 
 **Build & Development Settings:**
+
 ```
 Build Command: npm run build
 Output Directory: .next
@@ -80,6 +81,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ### 4. Deploy
 
 Click "Deploy" - Vercel will:
+
 1. Clone your repository
 2. Install dependencies
 3. Build your Next.js application
@@ -127,6 +129,7 @@ vercel domains add yourdomain.com
 ```
 
 Or via dashboard:
+
 1. Go to Project Settings → Domains
 2. Add your domain
 3. Choose domain type (apex, www, or subdomain)
@@ -136,6 +139,7 @@ Or via dashboard:
 Add DNS records as shown in Vercel:
 
 **For apex domain (yourdomain.com):**
+
 ```
 Type: A
 Name: @
@@ -143,6 +147,7 @@ Value: 76.76.21.21
 ```
 
 **For www subdomain:**
+
 ```
 Type: CNAME
 Name: www
@@ -218,7 +223,7 @@ const nextConfig = {
           },
         ],
       },
-    ]
+    ];
   },
 
   // Rewrites for API routes
@@ -228,11 +233,11 @@ const nextConfig = {
         source: '/api/supabase/:path*',
         destination: 'https://your-project-ref.supabase.co/:path*',
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
 ```
 
 ### 2. Vercel Configuration (vercel.json)
@@ -272,8 +277,8 @@ module.exports = nextConfig
 
 ```typescript
 // app/api/example/route.ts
-export const runtime = 'edge'
-export const preferredRegion = ['iad1', 'sfo1']
+export const runtime = 'edge';
+export const preferredRegion = ['iad1', 'sfo1'];
 
 export async function GET(request: Request) {
   // Your API logic
@@ -285,6 +290,7 @@ export async function GET(request: Request) {
 ### Preview Deployments
 
 Every git push to a branch creates a preview deployment:
+
 - Unique URL for each branch
 - Test changes before merging
 - Share with team for review
@@ -292,6 +298,7 @@ Every git push to a branch creates a preview deployment:
 ### Production Deployments
 
 Deployments to `main` branch go to production:
+
 - Automatic deployments on merge
 - Roll back capability
 - Zero-downtime deployments
@@ -313,6 +320,7 @@ vercel link --yes
 ### 1. Vercel Analytics
 
 Enable in Project Settings → Analytics:
+
 - Real User Monitoring (RUM)
 - Core Web Vitals
 - Page views and performance metrics
@@ -320,6 +328,7 @@ Enable in Project Settings → Analytics:
 ### 2. Performance Metrics
 
 Monitor via Vercel Dashboard:
+
 - Build time
 - Function execution time
 - Edge network performance
@@ -335,13 +344,13 @@ npm install @sentry/nextjs
 
 ```javascript
 // sentry.client.config.js
-import * as Sentry from '@sentry/nextjs'
+import * as Sentry from '@sentry/nextjs';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: process.env.NODE_ENV,
   tracesSampleRate: 1.0,
-})
+});
 ```
 
 ## Continuous Integration/Deployment
@@ -349,6 +358,7 @@ Sentry.init({
 ### GitHub Actions Integration
 
 Vercel integrates automatically with GitHub:
+
 - Builds on every push
 - Comments on PRs with preview URLs
 - Auto-deploy on merge to main
@@ -370,21 +380,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests
         run: npm test
-      
+
       - name: Build
         run: npm run build
-      
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
@@ -416,11 +426,13 @@ Create a script to run before build:
 ### Instant Rollback
 
 Via Vercel Dashboard:
+
 1. Go to Deployments
 2. Find previous successful deployment
 3. Click "Promote to Production"
 
 Via CLI:
+
 ```bash
 # List deployments
 vercel ls
@@ -445,23 +457,23 @@ Already configured in next.config.js headers section
 
 ```typescript
 // middleware.ts
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   // Verify authentication
-  const token = request.cookies.get('auth-token')
-  
+  const token = request.cookies.get('auth-token');
+
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url));
   }
-  
-  return NextResponse.next()
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: ['/api/protected/:path*'],
-}
+};
 ```
 
 ## Troubleshooting
@@ -469,16 +481,19 @@ export const config = {
 ### Build Failures
 
 **Check build logs:**
+
 ```bash
 vercel logs <deployment-url>
 ```
 
 **Common issues:**
+
 - Missing environment variables
 - TypeScript errors
 - Dependency conflicts
 
 **Solutions:**
+
 ```bash
 # Clear cache and rebuild
 vercel build --force
@@ -490,11 +505,13 @@ vercel env ls
 ### Performance Issues
 
 **Check:**
+
 - Bundle size: `npm run build` output
 - Image optimization settings
 - API response times
 
 **Tools:**
+
 - Vercel Analytics
 - Lighthouse CI
 - Bundle analyzer
@@ -502,11 +519,13 @@ vercel env ls
 ### Deployment Limits
 
 **Free Tier:**
+
 - 100 GB bandwidth/month
 - 100 hours build time/month
 - Unlimited deployments
 
 **Pro Tier:**
+
 - 1 TB bandwidth/month
 - 400 hours build time/month
 - Advanced features
@@ -524,9 +543,9 @@ npm install -D @next/bundle-analyzer
 // next.config.js
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
-})
+});
 
-module.exports = withBundleAnalyzer(nextConfig)
+module.exports = withBundleAnalyzer(nextConfig);
 ```
 
 ### 2. Reduce Function Executions
@@ -562,16 +581,16 @@ module.exports = withBundleAnalyzer(nextConfig)
 
 ```typescript
 // middleware.ts
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   // A/B testing
-  const bucket = Math.random() < 0.5 ? 'a' : 'b'
-  const response = NextResponse.next()
-  response.cookies.set('bucket', bucket)
-  
-  return response
+  const bucket = Math.random() < 0.5 ? 'a' : 'b';
+  const response = NextResponse.next();
+  response.cookies.set('bucket', bucket);
+
+  return response;
 }
 ```
 
@@ -591,12 +610,12 @@ export default async function TaskPage({ params }: { params: { id: string } }) {
 
 ```typescript
 // app/api/edge/route.ts
-export const runtime = 'edge'
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   return new Response(JSON.stringify({ message: 'Hello from Edge' }), {
     headers: { 'content-type': 'application/json' },
-  })
+  });
 }
 ```
 

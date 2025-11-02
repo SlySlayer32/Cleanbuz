@@ -9,6 +9,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### Technology Stack
 
 **Frontend:**
+
 - Next.js 14+ (App Router)
 - React 18+
 - TypeScript
@@ -17,6 +18,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 - Deployed on Vercel
 
 **Backend:**
+
 - Supabase (BaaS)
   - PostgreSQL Database
   - Edge Functions (Deno runtime)
@@ -25,6 +27,7 @@ Cleanbuz is a full-stack task management application designed for property manag
   - Storage for attachments
 
 **External Services:**
+
 - Mobile Message SMS API (notifications)
 - Airbnb iCal feeds (booking sync)
 
@@ -74,6 +77,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 1. Frontend (Next.js PWA)
 
 **Key Features:**
+
 - Server-side rendering (SSR) for SEO
 - Progressive Web App with offline support
 - Responsive design for mobile and desktop
@@ -81,6 +85,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 - Optimistic UI updates for better UX
 
 **Directory Structure:**
+
 ```
 /app
   /(auth)
@@ -112,6 +117,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 2. Database Schema (PostgreSQL)
 
 **Core Tables:**
+
 - `users` - User accounts with profile information
 - `bookings` - Airbnb bookings synced from iCal
 - `tasks` - Task items with assignments and status
@@ -123,6 +129,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 3. Supabase Edge Functions
 
 **Functions:**
+
 - `sync-ical-bookings` - Periodic iCal feed sync
 - `generate-tasks` - Auto-generate tasks from bookings
 - `send-daily-digest` - Daily notification scheduler
@@ -132,11 +139,13 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 4. Authentication Flow
 
 **Supported Methods:**
+
 1. **Phone OTP** - Primary method for quick access
 2. **Email/Password** - Traditional authentication
 3. **OAuth Providers** - Google, Apple (optional)
 
 **Security:**
+
 - Row Level Security (RLS) policies
 - JWT tokens with refresh rotation
 - Multi-factor authentication support
@@ -145,11 +154,13 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 5. Real-time Updates
 
 **Channels:**
+
 - `tasks:*` - Task changes broadcast
 - `bookings:*` - Booking updates
 - `notifications:*` - New notifications
 
 **Events:**
+
 - Task created/updated/completed
 - Booking added/modified
 - Team member assignments
@@ -157,12 +168,14 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 6. Notification System
 
 **Mobile Message SMS Integration:**
+
 - Daily task digests (morning)
 - Urgent task alerts
 - Booking reminders
 - Team notifications
 
 **Personalization:**
+
 - User timezone handling
 - Preference management
 - Quiet hours support
@@ -170,6 +183,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ### 7. iCal Sync Integration
 
 **Process:**
+
 1. Store iCal feed URLs in database
 2. Schedule periodic sync (every 15-60 minutes)
 3. Parse iCal format (RFC 5545)
@@ -181,6 +195,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 ## Data Flow
 
 ### Booking Sync Flow
+
 ```
 Airbnb → iCal Feed → Edge Function → Parse → Database
                                               ↓
@@ -190,6 +205,7 @@ Airbnb → iCal Feed → Edge Function → Parse → Database
 ```
 
 ### Task Management Flow
+
 ```
 User Action → Next.js → Supabase API → Database
                                          ↓
@@ -201,18 +217,21 @@ User Action → Next.js → Supabase API → Database
 ## Security Considerations
 
 ### Authentication & Authorization
+
 - Phone OTP with rate limiting
 - Secure password hashing (bcrypt)
 - OAuth token management
 - RLS policies for data isolation
 
 ### Data Protection
+
 - HTTPS/TLS encryption in transit
 - Database encryption at rest
 - API key rotation
 - Input validation and sanitization
 
 ### API Security
+
 - Rate limiting on Edge Functions
 - CORS configuration
 - Webhook signature verification
@@ -221,24 +240,28 @@ User Action → Next.js → Supabase API → Database
 ## Scalability Strategy
 
 ### Database
+
 - Indexed queries for performance
 - Connection pooling via Supabase
 - Partitioning for large tables
 - Read replicas for reporting
 
 ### Edge Functions
+
 - Stateless function design
 - Horizontal scaling via Deno Deploy
 - Efficient cron job scheduling
 - Queue-based processing for heavy tasks
 
 ### Frontend
+
 - CDN delivery via Vercel
 - Image optimization
 - Code splitting and lazy loading
 - Service worker caching
 
 ### Monitoring
+
 - Error tracking (Sentry)
 - Performance monitoring
 - Database query analysis
@@ -247,18 +270,21 @@ User Action → Next.js → Supabase API → Database
 ## Reliability Measures
 
 ### High Availability
+
 - Multi-region Supabase deployment
 - Vercel edge network deployment
 - Automatic failover
 - Health check endpoints
 
 ### Data Integrity
+
 - Database transactions
 - Idempotent operations
 - Retry mechanisms with exponential backoff
 - Data validation at all layers
 
 ### Backup & Recovery
+
 - Automated database backups
 - Point-in-time recovery
 - Disaster recovery plan
@@ -276,6 +302,7 @@ User Action → Next.js → Supabase API → Database
 ## Development Workflow
 
 ### Local Development
+
 1. Clone repository
 2. Install dependencies (`npm install`)
 3. Set up Supabase project
@@ -283,12 +310,14 @@ User Action → Next.js → Supabase API → Database
 5. Run development server (`npm run dev`)
 
 ### Testing
+
 - Unit tests (Jest/Vitest)
 - Integration tests (Playwright)
 - E2E tests (Cypress)
 - Load testing (k6)
 
 ### Deployment
+
 - Git push to main branch
 - Automatic Vercel deployment
 - Database migrations via Supabase CLI
@@ -298,14 +327,17 @@ User Action → Next.js → Supabase API → Database
 ## Cost Estimation
 
 ### Supabase (Pro Plan)
+
 - ~$25/month base
 - Additional for database size and bandwidth
 
 ### Vercel (Pro Plan)
+
 - ~$20/month
 - Additional for bandwidth and build time
 
 ### Mobile Message SMS
+
 - ~$0.0075 per SMS
 - Estimate: 100 users × 30 days × 2 SMS/day = ~$45/month
 

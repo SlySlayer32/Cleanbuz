@@ -11,6 +11,7 @@ This guide covers implementing real-time features using Supabase Realtime for th
 Supabase Realtime uses PostgreSQL's replication functionality to broadcast database changes via WebSocket connections. Changes are detected through Write-Ahead Logging (WAL) and published to subscribed channels.
 
 **Key Features:**
+
 - Database change events (INSERT, UPDATE, DELETE)
 - Broadcast messages (custom events)
 - Presence tracking (who's online)
@@ -23,6 +24,7 @@ Supabase Realtime uses PostgreSQL's replication functionality to broadcast datab
 ### 1. Enable Realtime for Tables
 
 In Supabase Dashboard:
+
 1. Navigate to Database → Replication
 2. Enable replication for tables:
    - `tasks`
@@ -43,8 +45,8 @@ ALTER PUBLICATION supabase_realtime ADD TABLE bookings;
 ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
 
 -- Check enabled tables
-SELECT schemaname, tablename 
-FROM pg_publication_tables 
+SELECT schemaname, tablename
+FROM pg_publication_tables
 WHERE pubname = 'supabase_realtime';
 ```
 
@@ -73,13 +75,13 @@ Subscribe to all changes on a table:
 
 ```typescript
 // lib/realtime/useRealtimeTasks.ts
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export function useRealtimeTasks(userId: string) {
-  const [channel, setChannel] = useState<RealtimeChannel | null>(null)
-  const supabase = createClient()
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     // Create channel
@@ -92,39 +94,39 @@ export function useRealtimeTasks(userId: string) {
           schema: 'public',
           table: 'tasks',
         },
-        (payload) => {
-          console.log('Task change:', payload)
-          handleTaskChange(payload)
+        payload => {
+          console.log('Task change:', payload);
+          handleTaskChange(payload);
         }
       )
-      .subscribe()
+      .subscribe();
 
-    setChannel(tasksChannel)
+    setChannel(tasksChannel);
 
     // Cleanup
     return () => {
-      supabase.removeChannel(tasksChannel)
-    }
-  }, [userId, supabase])
+      supabase.removeChannel(tasksChannel);
+    };
+  }, [userId, supabase]);
 
   const handleTaskChange = (payload: any) => {
-    const { eventType, new: newRecord, old: oldRecord } = payload
+    const { eventType, new: newRecord, old: oldRecord } = payload;
 
     switch (eventType) {
       case 'INSERT':
-        console.log('New task created:', newRecord)
+        console.log('New task created:', newRecord);
         // Update local state, show notification, etc.
-        break
+        break;
       case 'UPDATE':
-        console.log('Task updated:', newRecord)
-        break
+        console.log('Task updated:', newRecord);
+        break;
       case 'DELETE':
-        console.log('Task deleted:', oldRecord)
-        break
+        console.log('Task deleted:', oldRecord);
+        break;
     }
-  }
+  };
 
-  return { channel }
+  return { channel };
 }
 ```
 
@@ -144,14 +146,15 @@ const channel = supabase
       table: 'tasks',
       filter: `assigned_to=eq.${userId}`,
     },
-    (payload) => {
-      console.log('My task changed:', payload)
+    payload => {
+      console.log('My task changed:', payload);
     }
   )
-  .subscribe()
+  .subscribe();
 ```
 
 **Available filter operators:**
+
 - `eq` - equals
 - `neq` - not equals
 - `lt` - less than
@@ -175,11 +178,11 @@ const insertChannel = supabase
       schema: 'public',
       table: 'tasks',
     },
-    (payload) => {
-      showNotification(`New task: ${payload.new.title}`)
+    payload => {
+      showNotification(`New task: ${payload.new.title}`);
     }
   )
-  .subscribe()
+  .subscribe();
 
 // Listen only to UPDATE events
 const updateChannel = supabase
@@ -191,13 +194,13 @@ const updateChannel = supabase
       schema: 'public',
       table: 'tasks',
     },
-    (payload) => {
+    payload => {
       if (payload.old.status !== payload.new.status) {
-        console.log(`Task status changed: ${payload.old.status} → ${payload.new.status}`)
+        console.log(`Task status changed: ${payload.old.status} → ${payload.new.status}`);
       }
     }
   )
-  .subscribe()
+  .subscribe();
 ```
 
 ### 4. Multiple Table Subscriptions
@@ -214,7 +217,7 @@ const channel = supabase
       schema: 'public',
       table: 'tasks',
     },
-    (payload) => handleTaskChange(payload)
+    payload => handleTaskChange(payload)
   )
   .on(
     'postgres_changes',
@@ -223,7 +226,7 @@ const channel = supabase
       schema: 'public',
       table: 'bookings',
     },
-    (payload) => handleBookingChange(payload)
+    payload => handleBookingChange(payload)
   )
   .on(
     'postgres_changes',
@@ -232,9 +235,9 @@ const channel = supabase
       schema: 'public',
       table: 'notifications',
     },
-    (payload) => handleNewNotification(payload)
+    payload => handleNewNotification(payload)
   )
-  .subscribe()
+  .subscribe();
 ```
 
 ## React Integration
@@ -243,13 +246,13 @@ const channel = supabase
 
 ```typescript
 // hooks/useTasksRealtime.ts
-import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useTasksRealtime(userId: string) {
-  const queryClient = useQueryClient()
-  const supabase = createClient()
+  const queryClient = useQueryClient();
+  const supabase = createClient();
 
   useEffect(() => {
     const channel = supabase
@@ -262,38 +265,36 @@ export function useTasksRealtime(userId: string) {
           table: 'tasks',
           filter: `assigned_to=eq.${userId}`,
         },
-        (payload) => {
+        payload => {
           // Invalidate React Query cache to refetch
-          queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+          queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
 
           // Or update cache directly for optimistic updates
           if (payload.eventType === 'INSERT') {
             queryClient.setQueryData(['tasks', userId], (old: any) => {
-              return old ? [...old, payload.new] : [payload.new]
-            })
+              return old ? [...old, payload.new] : [payload.new];
+            });
           }
 
           if (payload.eventType === 'UPDATE') {
             queryClient.setQueryData(['tasks', userId], (old: any) => {
-              return old?.map((task: any) =>
-                task.id === payload.new.id ? payload.new : task
-              )
-            })
+              return old?.map((task: any) => (task.id === payload.new.id ? payload.new : task));
+            });
           }
 
           if (payload.eventType === 'DELETE') {
             queryClient.setQueryData(['tasks', userId], (old: any) => {
-              return old?.filter((task: any) => task.id !== payload.old.id)
-            })
+              return old?.filter((task: any) => task.id !== payload.old.id);
+            });
           }
         }
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [userId, queryClient, supabase])
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient, supabase]);
 }
 ```
 
@@ -348,7 +349,7 @@ Send custom events between clients without database changes:
 ### Sending Broadcasts
 
 ```typescript
-const channel = supabase.channel('task-collaboration')
+const channel = supabase.channel('task-collaboration');
 
 // Send a broadcast message
 await channel.send({
@@ -359,7 +360,7 @@ await channel.send({
     userId: 'user-456',
     timestamp: new Date().toISOString(),
   },
-})
+});
 ```
 
 ### Receiving Broadcasts
@@ -367,15 +368,15 @@ await channel.send({
 ```typescript
 const channel = supabase
   .channel('task-collaboration')
-  .on('broadcast', { event: 'task-viewed' }, (payload) => {
-    console.log('Someone viewed task:', payload)
+  .on('broadcast', { event: 'task-viewed' }, payload => {
+    console.log('Someone viewed task:', payload);
     // Show indicator that another user is viewing
   })
-  .on('broadcast', { event: 'task-editing' }, (payload) => {
-    console.log('Someone is editing task:', payload)
+  .on('broadcast', { event: 'task-editing' }, payload => {
+    console.log('Someone is editing task:', payload);
     // Show "User X is editing" indicator
   })
-  .subscribe()
+  .subscribe();
 ```
 
 ### Use Case: Collaborative Task Editing
@@ -441,12 +442,12 @@ Track who's online and their status:
 ### Implementation
 
 ```typescript
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export function usePresence(roomId: string, userId: string) {
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([])
-  const supabase = createClient()
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const supabase = createClient();
 
   useEffect(() => {
     const channel = supabase.channel(`presence-${roomId}`, {
@@ -455,37 +456,37 @@ export function usePresence(roomId: string, userId: string) {
           key: userId,
         },
       },
-    })
+    });
 
     channel
       .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState()
-        const users = Object.values(presenceState).flat()
-        setOnlineUsers(users)
+        const presenceState = channel.presenceState();
+        const users = Object.values(presenceState).flat();
+        setOnlineUsers(users);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('Users joined:', newPresences)
+        console.log('Users joined:', newPresences);
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('Users left:', leftPresences)
+        console.log('Users left:', leftPresences);
       })
-      .subscribe(async (status) => {
+      .subscribe(async status => {
         if (status === 'SUBSCRIBED') {
           await channel.track({
             userId,
             onlineAt: new Date().toISOString(),
             status: 'active',
-          })
+          });
         }
-      })
+      });
 
     return () => {
-      channel.untrack()
-      supabase.removeChannel(channel)
-    }
-  }, [roomId, userId, supabase])
+      channel.untrack();
+      supabase.removeChannel(channel);
+    };
+  }, [roomId, userId, supabase]);
 
-  return { onlineUsers }
+  return { onlineUsers };
 }
 ```
 
@@ -530,11 +531,11 @@ export function TeamPresence({ propertyId }: { propertyId: string }) {
 Update UI immediately before server confirms:
 
 ```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function useUpdateTask() {
-  const queryClient = useQueryClient()
-  const supabase = createClient()
+  const queryClient = useQueryClient();
+  const supabase = createClient();
 
   return useMutation({
     mutationFn: async ({ taskId, updates }: any) => {
@@ -543,36 +544,34 @@ function useUpdateTask() {
         .update(updates)
         .eq('id', taskId)
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     },
     onMutate: async ({ taskId, updates }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
 
       // Snapshot previous value
-      const previousTasks = queryClient.getQueryData(['tasks'])
+      const previousTasks = queryClient.getQueryData(['tasks']);
 
       // Optimistically update
       queryClient.setQueryData(['tasks'], (old: any) =>
-        old?.map((task: any) =>
-          task.id === taskId ? { ...task, ...updates } : task
-        )
-      )
+        old?.map((task: any) => (task.id === taskId ? { ...task, ...updates } : task))
+      );
 
-      return { previousTasks }
+      return { previousTasks };
     },
     onError: (err, variables, context) => {
       // Rollback on error
-      queryClient.setQueryData(['tasks'], context?.previousTasks)
+      queryClient.setQueryData(['tasks'], context?.previousTasks);
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
-  })
+  });
 }
 ```
 
@@ -631,26 +630,26 @@ export function ConnectionStatus() {
 Prevent excessive realtime updates:
 
 ```typescript
-import { useEffect, useRef } from 'react'
-import { debounce } from 'lodash'
+import { useEffect, useRef } from 'react';
+import { debounce } from 'lodash';
 
 export function useDebouncedRealtime(callback: Function, delay: number = 500) {
-  const debouncedCallback = useRef(debounce(callback, delay)).current
+  const debouncedCallback = useRef(debounce(callback, delay)).current;
 
   useEffect(() => {
     return () => {
-      debouncedCallback.cancel()
-    }
-  }, [debouncedCallback])
+      debouncedCallback.cancel();
+    };
+  }, [debouncedCallback]);
 
-  return debouncedCallback
+  return debouncedCallback;
 }
 
 // Usage
-const handleTaskUpdate = useDebouncedRealtime((payload) => {
+const handleTaskUpdate = useDebouncedRealtime(payload => {
   // This will only run once per 500ms at most
-  updateTaskInUI(payload.new)
-}, 500)
+  updateTaskInUI(payload.new);
+}, 500);
 ```
 
 ## Performance Optimization
@@ -661,29 +660,29 @@ Reuse channels instead of creating many:
 
 ```typescript
 class RealtimeChannelManager {
-  private channels = new Map<string, any>()
-  private supabase = createClient()
+  private channels = new Map<string, any>();
+  private supabase = createClient();
 
   getChannel(name: string) {
     if (this.channels.has(name)) {
-      return this.channels.get(name)
+      return this.channels.get(name);
     }
 
-    const channel = this.supabase.channel(name)
-    this.channels.set(name, channel)
-    return channel
+    const channel = this.supabase.channel(name);
+    this.channels.set(name, channel);
+    return channel;
   }
 
   removeChannel(name: string) {
-    const channel = this.channels.get(name)
+    const channel = this.channels.get(name);
     if (channel) {
-      this.supabase.removeChannel(channel)
-      this.channels.delete(name)
+      this.supabase.removeChannel(channel);
+      this.channels.delete(name);
     }
   }
 }
 
-export const channelManager = new RealtimeChannelManager()
+export const channelManager = new RealtimeChannelManager();
 ```
 
 ### 2. Selective Updates
@@ -692,19 +691,19 @@ Only update what changed:
 
 ```typescript
 const handleTaskUpdate = (payload: any) => {
-  const { old: oldTask, new: newTask } = payload
+  const { old: oldTask, new: newTask } = payload;
 
   // Only update if specific fields changed
   if (oldTask.status !== newTask.status) {
-    updateStatusUI(newTask.status)
+    updateStatusUI(newTask.status);
   }
 
   if (oldTask.assigned_to !== newTask.assigned_to) {
-    updateAssigneeUI(newTask.assigned_to)
+    updateAssigneeUI(newTask.assigned_to);
   }
 
   // Skip unnecessary UI updates
-}
+};
 ```
 
 ### 3. Batched Updates
@@ -712,28 +711,28 @@ const handleTaskUpdate = (payload: any) => {
 Batch multiple updates:
 
 ```typescript
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 
 export function useBatchedRealtime(batchInterval: number = 1000) {
-  const [updates, setUpdates] = useState<any[]>([])
-  const batchRef = useRef<any[]>([])
+  const [updates, setUpdates] = useState<any[]>([]);
+  const batchRef = useRef<any[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (batchRef.current.length > 0) {
-        setUpdates([...batchRef.current])
-        batchRef.current = []
+        setUpdates([...batchRef.current]);
+        batchRef.current = [];
       }
-    }, batchInterval)
+    }, batchInterval);
 
-    return () => clearInterval(interval)
-  }, [batchInterval])
+    return () => clearInterval(interval);
+  }, [batchInterval]);
 
   const addUpdate = (update: any) => {
-    batchRef.current.push(update)
-  }
+    batchRef.current.push(update);
+  };
 
-  return { updates, addUpdate }
+  return { updates, addUpdate };
 }
 ```
 
@@ -742,31 +741,27 @@ export function useBatchedRealtime(batchInterval: number = 1000) {
 ```typescript
 const channel = supabase
   .channel('tasks-channel')
-  .on(
-    'postgres_changes',
-    { event: '*', schema: 'public', table: 'tasks' },
-    (payload) => {
-      try {
-        handleTaskChange(payload)
-      } catch (error) {
-        console.error('Error handling realtime update:', error)
-        // Report to error tracking service
-        Sentry.captureException(error)
-      }
-    }
-  )
-  .subscribe((status, error) => {
-    if (status === 'SUBSCRIBED') {
-      console.log('Successfully subscribed to realtime updates')
-    }
-    if (error) {
-      console.error('Subscription error:', error)
-      // Attempt reconnection
-      setTimeout(() => {
-        channel.subscribe()
-      }, 5000)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
+    try {
+      handleTaskChange(payload);
+    } catch (error) {
+      console.error('Error handling realtime update:', error);
+      // Report to error tracking service
+      Sentry.captureException(error);
     }
   })
+  .subscribe((status, error) => {
+    if (status === 'SUBSCRIBED') {
+      console.log('Successfully subscribed to realtime updates');
+    }
+    if (error) {
+      console.error('Subscription error:', error);
+      // Attempt reconnection
+      setTimeout(() => {
+        channel.subscribe();
+      }, 5000);
+    }
+  });
 ```
 
 ## Testing Realtime Features
@@ -774,27 +769,24 @@ const channel = supabase
 ### Mock Realtime Events
 
 ```typescript
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
 describe('Realtime Tasks', () => {
   it('should update UI on task creation', async () => {
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!
-    )
+    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
     const { data } = await supabase
       .from('tasks')
       .insert({ title: 'Test Task', assigned_to: 'user-id' })
-      .select()
+      .select();
 
     // Wait for realtime update
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Assert UI updated
-    expect(screen.getByText('Test Task')).toBeInTheDocument()
-  })
-})
+    expect(screen.getByText('Test Task')).toBeInTheDocument();
+  });
+});
 ```
 
 ## Best Practices

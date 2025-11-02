@@ -18,6 +18,7 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 ## Tech Stack
 
 ### Frontend
+
 - **Next.js 14+** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
@@ -25,6 +26,7 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 - **PWA** - Progressive Web App capabilities
 
 ### Backend
+
 - **Supabase** - Backend-as-a-Service
   - PostgreSQL database
   - Authentication (Phone, Email, OAuth)
@@ -35,31 +37,38 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 - **iCal/RFC 5545** - Calendar feed parsing
 
 ### Deployment
+
 - **Vercel** - Frontend hosting and edge functions
 - **Supabase Cloud** - Database and backend services
 
 ## Documentation
 
 ### Getting Started
+
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup guide from scratch
 
 ### Architecture & Design
+
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design decisions
 - **[DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)** - Complete database schema with RLS policies
 
 ### Backend Setup
+
 - **[SUPABASE_SETUP.md](SUPABASE_SETUP.md)** - Supabase project configuration
 - **[AUTHENTICATION.md](AUTHENTICATION.md)** - Phone OTP, email, and OAuth implementation
 - **[REALTIME_UPDATES.md](REALTIME_UPDATES.md)** - Real-time synchronization setup
 
 ### Integrations
+
 - **[ICAL_INTEGRATION.md](ICAL_INTEGRATION.md)** - Airbnb/VRBO booking sync via iCal
 - **[MOBILE_MESSAGE_SMS.md](MOBILE_MESSAGE_SMS.md)** - SMS notification implementation
 
 ### Frontend Development
+
 - **[NEXTJS_FRONTEND.md](NEXTJS_FRONTEND.md)** - Next.js PWA development guide
 
 ### Deployment & Operations
+
 - **[VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)** - Production deployment guide
 - **[SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md)** - Security and scalability measures
 
@@ -142,6 +151,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 ## Features in Detail
 
 ### 1. Booking Synchronization
+
 - Automatic iCal feed polling (every 15-60 minutes)
 - Support for multiple platforms (Airbnb, VRBO, Booking.com)
 - Guest information extraction
@@ -149,6 +159,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 - Change detection and notifications
 
 ### 2. Task Management
+
 - Template-based task generation
 - Checklist support
 - Priority levels (Low, Medium, High, Urgent)
@@ -158,12 +169,14 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 - Team assignments
 
 ### 3. Real-time Features
+
 - Instant task updates across devices
 - Live booking synchronization
 - Presence tracking (who's online)
 - Collaborative editing indicators
 
 ### 4. Notification System
+
 - Daily task digests (morning)
 - Task reminders (2 hours before due)
 - Urgent task alerts
@@ -172,6 +185,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 - Timezone-aware delivery
 
 ### 5. Authentication
+
 - Phone OTP (primary method)
 - Email/Password
 - OAuth (Google, Apple)
@@ -180,6 +194,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 - Password reset flow
 
 ### 6. Progressive Web App
+
 - Installable on mobile devices
 - Offline functionality
 - Push notifications
@@ -224,6 +239,7 @@ npm run lint
 ## Database Schema
 
 Key tables:
+
 - `profiles` - User accounts and preferences
 - `properties` - Property information
 - `ical_feeds` - iCal feed configurations

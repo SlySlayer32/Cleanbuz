@@ -154,16 +154,16 @@ const withPWA = require('next-pwa')({
       },
     },
   ],
-})
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     domains: ['your-project-ref.supabase.co'],
   },
-}
+};
 
-module.exports = withPWA(nextConfig)
+module.exports = withPWA(nextConfig);
 ```
 
 ### PWA Manifest (public/manifest.json)
@@ -665,12 +665,12 @@ export function TaskForm({ onSuccess }: { onSuccess?: () => void }) {
 
 ```typescript
 // hooks/useTasks.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createClient } from '@/lib/supabase/client';
 
 export function useTasks(userId: string) {
-  const supabase = createClient()
-  const queryClient = useQueryClient()
+  const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const tasks = useQuery({
     queryKey: ['tasks', userId],
@@ -679,36 +679,30 @@ export function useTasks(userId: string) {
         .from('tasks')
         .select('*, property:properties(*), booking:bookings(*)')
         .eq('assigned_to', userId)
-        .order('due_date', { ascending: true })
+        .order('due_date', { ascending: true });
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     },
     enabled: !!userId,
-  })
+  });
 
   const updateTask = useMutation({
-    mutationFn: async ({
-      id,
-      updates,
-    }: {
-      id: string
-      updates: Partial<any>
-    }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<any> }) => {
       const { data, error } = await supabase
         .from('tasks')
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
     },
-  })
+  });
 
   const completeTask = useMutation({
     mutationFn: async (taskId: string) => {
@@ -720,15 +714,15 @@ export function useTasks(userId: string) {
         })
         .eq('id', taskId)
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
     },
-  })
+  });
 
   return {
     tasks: tasks.data || [],
@@ -736,7 +730,7 @@ export function useTasks(userId: string) {
     error: tasks.error,
     updateTask,
     completeTask,
-  }
+  };
 }
 ```
 
@@ -746,29 +740,21 @@ export function useTasks(userId: string) {
 
 ```javascript
 // public/sw.js
-const CACHE_NAME = 'cleanbuz-v1'
-const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/tasks',
-  '/bookings',
-  '/offline',
-]
+const CACHE_NAME = 'cleanbuz-v1';
+const urlsToCache = ['/', '/dashboard', '/tasks', '/bookings', '/offline'];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
-  )
-})
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+});
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
     caches
       .match(event.request)
-      .then((response) => response || fetch(event.request))
+      .then(response => response || fetch(event.request))
       .catch(() => caches.match('/offline'))
-  )
-})
+  );
+});
 ```
 
 ## Performance Optimization
@@ -825,7 +811,7 @@ describe('TaskCard', () => {
     }
 
     render(<TaskCard task={task} />)
-    
+
     expect(screen.getByText('Clean apartment')).toBeInTheDocument()
     expect(screen.getByText('Property 1')).toBeInTheDocument()
   })

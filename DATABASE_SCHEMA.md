@@ -199,7 +199,7 @@ CREATE TABLE public.bookings (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   synced_at TIMESTAMPTZ DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  
+
   -- Constraints
   CONSTRAINT check_dates CHECK (check_out > check_in),
   CONSTRAINT unique_external_booking UNIQUE (property_id, external_id)
@@ -461,7 +461,7 @@ CREATE TABLE public.team_members (
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   CONSTRAINT unique_property_user UNIQUE (property_id, user_id)
 );
 
@@ -563,6 +563,7 @@ CREATE TRIGGER on_auth_user_created
 ## Sample Data Queries
 
 ### Get upcoming tasks for a user
+
 ```sql
 SELECT t.*, p.name as property_name, b.guest_name
 FROM tasks t
@@ -575,6 +576,7 @@ ORDER BY t.due_date ASC;
 ```
 
 ### Get bookings needing task generation
+
 ```sql
 SELECT b.*, p.name as property_name
 FROM bookings b
@@ -589,8 +591,9 @@ WHERE b.check_in >= CURRENT_DATE
 ```
 
 ### Get daily task digest for user
+
 ```sql
-SELECT 
+SELECT
   COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
   COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress_count,
   COUNT(*) FILTER (WHERE due_date::date = CURRENT_DATE) as due_today_count

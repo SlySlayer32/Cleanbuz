@@ -120,6 +120,7 @@ Create `supabase/migrations/20240101000000_initial_schema.sql`:
 ```
 
 Apply migration:
+
 ```bash
 supabase db push
 ```
@@ -129,6 +130,7 @@ supabase db push
 In Supabase Dashboard → Authentication → Providers:
 
 **Enable Phone (SMS):**
+
 1. Toggle "Phone" to enabled
 2. Select provider: Mobile Message
 3. Enter Mobile Message credentials:
@@ -137,10 +139,12 @@ In Supabase Dashboard → Authentication → Providers:
    - Phone Number
 
 **Enable Email:**
+
 - Already enabled by default
 - Customize email templates if needed
 
 **Enable OAuth (optional):**
+
 1. Enable Google provider
 2. Add Client ID and Secret from Google Cloud Console
 3. Add redirect URLs
@@ -170,6 +174,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 Add to `.gitignore`:
+
 ```
 .env*.local
 .env.production
@@ -182,19 +187,18 @@ Add to `.gitignore`:
 Create `src/lib/supabase/client.ts`:
 
 ```typescript
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export const createClient = () => createClientComponentClient()
+export const createClient = () => createClientComponentClient();
 ```
 
 Create `src/lib/supabase/server.ts`:
 
 ```typescript
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
-export const createServerClient = () =>
-  createServerComponentClient({ cookies })
+export const createServerClient = () => createServerComponentClient({ cookies });
 ```
 
 #### 2. Authentication Components
@@ -222,11 +226,13 @@ Create `middleware.ts`:
 #### 4. Task Components
 
 Create `src/components/tasks/TaskList.tsx`:
+
 ```typescript
 // Copy from NEXTJS_FRONTEND.md
 ```
 
 Create `src/components/tasks/TaskCard.tsx`:
+
 ```typescript
 // Copy from NEXTJS_FRONTEND.md
 ```
@@ -234,11 +240,13 @@ Create `src/components/tasks/TaskCard.tsx`:
 #### 5. Layout Components
 
 Create `src/components/layout/Header.tsx`:
+
 ```typescript
 // Copy from NEXTJS_FRONTEND.md
 ```
 
 Create `src/components/layout/Sidebar.tsx`:
+
 ```typescript
 // Copy from NEXTJS_FRONTEND.md
 ```
@@ -300,6 +308,7 @@ SELECT cron.schedule(
 #### 1. Enable Realtime for Tables
 
 In Supabase Dashboard → Database → Replication:
+
 - Enable for `tasks`
 - Enable for `bookings`
 - Enable for `notifications`
@@ -354,11 +363,11 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-})
+});
 
 module.exports = withPWA({
   // Your Next.js config
-})
+});
 ```
 
 #### 3. Create Manifest
@@ -454,6 +463,7 @@ vercel --prod
 ```
 
 Or use Vercel Dashboard:
+
 1. Go to [vercel.com](https://vercel.com)
 2. Import your GitHub repository
 3. Configure environment variables
@@ -470,6 +480,7 @@ Follow DNS instructions to point domain to Vercel.
 ## Verification Checklist
 
 ### Authentication
+
 - [ ] Users can sign up with email
 - [ ] Users can sign up with phone (OTP)
 - [ ] OAuth login works (if configured)
@@ -477,6 +488,7 @@ Follow DNS instructions to point domain to Vercel.
 - [ ] Logout works correctly
 
 ### Tasks
+
 - [ ] Users can view their assigned tasks
 - [ ] Users can create new tasks
 - [ ] Users can update task status
@@ -484,18 +496,21 @@ Follow DNS instructions to point domain to Vercel.
 - [ ] Tasks appear in real-time
 
 ### Bookings
+
 - [ ] iCal feed can be added
 - [ ] Bookings sync automatically
 - [ ] New bookings generate tasks
 - [ ] Booking changes update tasks
 
 ### Notifications
+
 - [ ] SMS notifications are sent
 - [ ] Daily digest works
 - [ ] Task reminders work
 - [ ] Users can configure preferences
 
 ### Performance
+
 - [ ] Page load time < 2 seconds
 - [ ] Images are optimized
 - [ ] PWA installs on mobile
@@ -506,10 +521,11 @@ Follow DNS instructions to point domain to Vercel.
 ### Issue: Supabase connection fails
 
 **Solution:**
+
 ```typescript
 // Verify environment variables
-console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-console.log('Anon Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+console.log('Anon Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 ```
 
 ### Issue: Authentication redirects not working
@@ -520,6 +536,7 @@ Check `middleware.ts` configuration and ensure redirect URLs are correct in Supa
 ### Issue: SMS not sending
 
 **Solution:**
+
 1. Verify Mobile Message credentials
 2. Check phone number format (E.164)
 3. Ensure sufficient Mobile Message balance
@@ -528,6 +545,7 @@ Check `middleware.ts` configuration and ensure redirect URLs are correct in Supa
 ### Issue: iCal sync failing
 
 **Solution:**
+
 1. Verify iCal URL is accessible
 2. Check Edge Function logs: `supabase functions logs sync-ical-bookings`
 3. Ensure database has correct permissions
@@ -558,17 +576,20 @@ Check `middleware.ts` configuration and ensure redirect URLs are correct in Supa
 ## Resources
 
 ### Documentation
+
 - [Supabase Docs](https://supabase.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
 - [Mobile Message Docs](https://www.mobilemessage.com.au/docs)
 - [Vercel Docs](https://vercel.com/docs)
 
 ### Support
+
 - [Supabase Discord](https://discord.supabase.com)
 - [Next.js Discord](https://nextjs.org/discord)
 - [Mobile Message Support](https://www.mobilemessage.com.au/support)
 
 ### Learning Resources
+
 - [Supabase YouTube](https://www.youtube.com/c/supabase)
 - [Next.js Learn](https://nextjs.org/learn)
 - [React Query Docs](https://tanstack.com/query/latest)
@@ -584,6 +605,7 @@ If you encounter any issues:
 5. Check Edge Function logs in Supabase Dashboard
 
 For additional help, refer to specific documentation files:
+
 - `ARCHITECTURE.md` - System overview
 - `DATABASE_SCHEMA.md` - Database structure
 - `SUPABASE_SETUP.md` - Supabase configuration
@@ -596,6 +618,7 @@ For additional help, refer to specific documentation files:
 ## Support
 
 For issues or questions:
+
 1. Check documentation in this repository
 2. Search GitHub issues
 3. Create new issue with detailed description

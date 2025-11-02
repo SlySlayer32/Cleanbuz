@@ -9,6 +9,7 @@ This guide covers integrating iCal feeds from Airbnb (and other booking platform
 iCal (iCalendar) is a standard format (RFC 5545) for exchanging calendar information. Airbnb and most booking platforms provide iCal feed URLs that contain booking data in a standardized format.
 
 **Key Features:**
+
 - Standard format across platforms
 - Read-only feed URLs
 - Automatic updates
@@ -90,34 +91,34 @@ npm install node-ical
 
 ```typescript
 // lib/ical/parser.ts
-import * as ical from 'node-ical'
+import * as ical from 'node-ical';
 
 export interface ParsedBooking {
-  uid: string
-  summary: string
-  description?: string
-  startDate: Date
-  endDate: Date
-  status: string
-  location?: string
-  raw?: any
+  uid: string;
+  summary: string;
+  description?: string;
+  startDate: Date;
+  endDate: Date;
+  status: string;
+  location?: string;
+  raw?: any;
 }
 
 export async function parseICalFeed(feedUrl: string): Promise<ParsedBooking[]> {
   try {
-    const events = await ical.async.fromURL(feedUrl)
-    const bookings: ParsedBooking[] = []
+    const events = await ical.async.fromURL(feedUrl);
+    const bookings: ParsedBooking[] = [];
 
     for (const [uid, event] of Object.entries(events)) {
       // Only process VEVENT type (actual events)
-      if (event.type !== 'VEVENT') continue
+      if (event.type !== 'VEVENT') continue;
 
       // Skip if no dates
-      if (!event.start || !event.end) continue
+      if (!event.start || !event.end) continue;
 
       // Extract guest name from summary if available
       // Format: "Reserved - Guest Name" or "Blocked" or "Not available"
-      const summary = event.summary || 'Reserved'
+      const summary = event.summary || 'Reserved';
 
       bookings.push({
         uid,
@@ -128,13 +129,13 @@ export async function parseICalFeed(feedUrl: string): Promise<ParsedBooking[]> {
         status: event.status || 'CONFIRMED',
         location: event.location || '',
         raw: event,
-      })
+      });
     }
 
-    return bookings
+    return bookings;
   } catch (error) {
-    console.error('Failed to parse iCal feed:', error)
-    throw new Error(`iCal parsing failed: ${error.message}`)
+    console.error('Failed to parse iCal feed:', error);
+    throw new Error(`iCal parsing failed: ${error.message}`);
   }
 }
 
@@ -144,22 +145,17 @@ export function extractGuestName(summary: string): string | null {
   // "Reserved - John Doe"
   // "Reserved (John Doe)"
   // "Airbnb - John D."
-  
-  const patterns = [
-    /Reserved - (.+)/,
-    /Reserved \((.+)\)/,
-    /Airbnb - (.+)/,
-    /VRBO - (.+)/,
-  ]
+
+  const patterns = [/Reserved - (.+)/, /Reserved \((.+)\)/, /Airbnb - (.+)/, /VRBO - (.+)/];
 
   for (const pattern of patterns) {
-    const match = summary.match(pattern)
+    const match = summary.match(pattern);
     if (match && match[1]) {
-      return match[1].trim()
+      return match[1].trim();
     }
   }
 
-  return null
+  return null;
 }
 ```
 
@@ -167,17 +163,17 @@ export function extractGuestName(summary: string): string | null {
 
 ```typescript
 // lib/ical/sync-service.ts
-import { createClient } from '@/lib/supabase/server'
-import { parseICalFeed, extractGuestName } from './parser'
+import { createClient } from '@/lib/supabase/server';
+import { parseICalFeed, extractGuestName } from './parser';
 
 export class ICalSyncService {
-  private supabase = createClient()
+  private supabase = createClient();
 
   async syncFeed(feedId: string): Promise<{
-    success: boolean
-    created: number
-    updated: number
-    error?: string
+    success: boolean;
+    created: number;
+    updated: number;
+    error?: string;
   }> {
     try {
       // Get feed configuration
@@ -185,17 +181,17 @@ export class ICalSyncService {
         .from('ical_feeds')
         .select('*')
         .eq('id', feedId)
-        .single()
+        .single();
 
       if (feedError || !feed) {
-        throw new Error('Feed not found')
+        throw new Error('Feed not found');
       }
 
       // Parse iCal feed
-      const parsedBookings = await parseICalFeed(feed.feed_url)
+      const parsedBookings = await parseICalFeed(feed.feed_url);
 
-      let created = 0
-      let updated = 0
+      let created = 0;
+      let updated = 0;
 
       for (const booking of parsedBookings) {
         // Skip blocked/unavailable dates without guest
@@ -203,11 +199,11 @@ export class ICalSyncService {
           booking.summary.toLowerCase().includes('blocked') ||
           booking.summary.toLowerCase().includes('not available')
         ) {
-          continue
+          continue;
         }
 
         // Extract guest name
-        const guestName = extractGuestName(booking.summary) || 'Guest'
+        const guestName = extractGuestName(booking.summary) || 'Guest';
 
         // Prepare booking data
         const bookingData = {
@@ -221,7 +217,7 @@ export class ICalSyncService {
           booking_source: feed.platform,
           raw_ical_data: JSON.stringify(booking.raw),
           synced_at: new Date().toISOString(),
-        }
+        };
 
         // Upsert booking (insert or update if exists)
         const { data: existingBooking } = await this.supabase
@@ -229,25 +225,22 @@ export class ICalSyncService {
           .select('id, check_in, check_out, booking_status')
           .eq('property_id', feed.property_id)
           .eq('external_id', booking.uid)
-          .single()
+          .single();
 
         if (existingBooking) {
           // Check if anything changed
           const hasChanges =
             existingBooking.check_in !== bookingData.check_in ||
             existingBooking.check_out !== bookingData.check_out ||
-            existingBooking.booking_status !== bookingData.booking_status
+            existingBooking.booking_status !== bookingData.booking_status;
 
           if (hasChanges) {
-            await this.supabase
-              .from('bookings')
-              .update(bookingData)
-              .eq('id', existingBooking.id)
+            await this.supabase.from('bookings').update(bookingData).eq('id', existingBooking.id);
 
-            updated++
+            updated++;
 
             // Trigger notification about change
-            await this.notifyBookingChange(existingBooking.id, 'updated')
+            await this.notifyBookingChange(existingBooking.id, 'updated');
           }
         } else {
           // Create new booking
@@ -255,16 +248,16 @@ export class ICalSyncService {
             .from('bookings')
             .insert(bookingData)
             .select()
-            .single()
+            .single();
 
           if (!insertError && newBooking) {
-            created++
+            created++;
 
             // Generate tasks for new booking
-            await this.generateTasksForBooking(newBooking.id)
+            await this.generateTasksForBooking(newBooking.id);
 
             // Send notification
-            await this.notifyBookingChange(newBooking.id, 'created')
+            await this.notifyBookingChange(newBooking.id, 'created');
           }
         }
       }
@@ -282,11 +275,11 @@ export class ICalSyncService {
             bookings_updated: (feed.sync_stats?.bookings_updated || 0) + updated,
           },
         })
-        .eq('id', feedId)
+        .eq('id', feedId);
 
-      return { success: true, created, updated }
+      return { success: true, created, updated };
     } catch (error) {
-      console.error('Sync failed:', error)
+      console.error('Sync failed:', error);
 
       // Update feed with error
       await this.supabase
@@ -295,14 +288,14 @@ export class ICalSyncService {
           last_sync_status: 'error',
           last_sync_error: error.message,
         })
-        .eq('id', feedId)
+        .eq('id', feedId);
 
       return {
         success: false,
         created: 0,
         updated: 0,
         error: error.message,
-      }
+      };
     }
   }
 
@@ -311,8 +304,8 @@ export class ICalSyncService {
       CONFIRMED: 'confirmed',
       TENTATIVE: 'pending',
       CANCELLED: 'cancelled',
-    }
-    return statusMap[icalStatus] || 'confirmed'
+    };
+    return statusMap[icalStatus] || 'confirmed';
   }
 
   private async generateTasksForBooking(bookingId: string): Promise<void> {
@@ -321,32 +314,28 @@ export class ICalSyncService {
       .from('bookings')
       .select('*, property:properties(*)')
       .eq('id', bookingId)
-      .single()
+      .single();
 
-    if (!booking) return
+    if (!booking) return;
 
     // Get applicable task templates
     const { data: templates } = await this.supabase
       .from('task_templates')
       .select('*')
-      .or(
-        `property_id.eq.${booking.property_id},property_id.is.null`
-      )
+      .or(`property_id.eq.${booking.property_id},property_id.is.null`)
       .eq('is_active', true)
-      .in('trigger_event', ['check_in', 'check_out'])
+      .in('trigger_event', ['check_in', 'check_out']);
 
-    if (!templates) return
+    if (!templates) return;
 
     // Generate tasks from templates
     for (const template of templates) {
       const dueDate = new Date(
-        template.trigger_event === 'check_in'
-          ? booking.check_in
-          : booking.check_out
-      )
+        template.trigger_event === 'check_in' ? booking.check_in : booking.check_out
+      );
 
       // Apply offset (hours before/after)
-      dueDate.setHours(dueDate.getHours() + template.trigger_offset_hours)
+      dueDate.setHours(dueDate.getHours() + template.trigger_offset_hours);
 
       await this.supabase.from('tasks').insert({
         property_id: booking.property_id,
@@ -360,7 +349,7 @@ export class ICalSyncService {
         due_date: dueDate.toISOString(),
         checklist_items: template.checklist_items,
         status: 'pending',
-      })
+      });
     }
   }
 
@@ -373,73 +362,71 @@ export class ICalSyncService {
   }
 }
 
-export const icalSyncService = new ICalSyncService()
+export const icalSyncService = new ICalSyncService();
 ```
 
 ### Edge Function: Scheduled Sync
 
 ```typescript
 // supabase/functions/sync-ical-bookings/index.ts
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import * as ical from 'https://esm.sh/node-ical@0.16.1'
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import * as ical from 'https://esm.sh/node-ical@0.16.1';
 
-serve(async (req) => {
+serve(async req => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+    );
 
     // Get all active feeds that need syncing
-    const now = new Date()
+    const now = new Date();
     const { data: feeds } = await supabase
       .from('ical_feeds')
       .select('*')
       .eq('is_active', true)
-      .is('deleted_at', null)
+      .is('deleted_at', null);
 
-    const results = []
+    const results = [];
 
     for (const feed of feeds || []) {
       // Check if it's time to sync based on frequency
-      const lastSync = feed.last_synced_at
-        ? new Date(feed.last_synced_at)
-        : new Date(0)
-      const minutesSinceSync = (now.getTime() - lastSync.getTime()) / 60000
+      const lastSync = feed.last_synced_at ? new Date(feed.last_synced_at) : new Date(0);
+      const minutesSinceSync = (now.getTime() - lastSync.getTime()) / 60000;
 
       if (minutesSinceSync < feed.sync_frequency_minutes) {
-        continue // Skip, not time yet
+        continue; // Skip, not time yet
       }
 
       try {
         // Fetch and parse iCal feed
-        const response = await fetch(feed.feed_url)
+        const response = await fetch(feed.feed_url);
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const icalData = await response.text()
-        const events = await ical.async.parseICS(icalData)
+        const icalData = await response.text();
+        const events = await ical.async.parseICS(icalData);
 
-        let created = 0
-        let updated = 0
+        let created = 0;
+        let updated = 0;
 
         for (const [uid, event] of Object.entries(events)) {
-          if (event.type !== 'VEVENT') continue
-          if (!event.start || !event.end) continue
+          if (event.type !== 'VEVENT') continue;
+          if (!event.start || !event.end) continue;
 
           // Skip blocked dates
-          const summary = event.summary || ''
+          const summary = event.summary || '';
           if (
             summary.toLowerCase().includes('blocked') ||
             summary.toLowerCase().includes('not available')
           ) {
-            continue
+            continue;
           }
 
           // Extract guest name
-          const guestName = extractGuestName(summary) || 'Guest'
+          const guestName = extractGuestName(summary) || 'Guest';
 
           const bookingData = {
             property_id: feed.property_id,
@@ -452,7 +439,7 @@ serve(async (req) => {
             booking_source: feed.platform,
             raw_ical_data: JSON.stringify(event),
             synced_at: now.toISOString(),
-          }
+          };
 
           // Check if booking exists
           const { data: existing } = await supabase
@@ -460,17 +447,14 @@ serve(async (req) => {
             .select('id')
             .eq('property_id', feed.property_id)
             .eq('external_id', uid)
-            .single()
+            .single();
 
           if (existing) {
-            await supabase
-              .from('bookings')
-              .update(bookingData)
-              .eq('id', existing.id)
-            updated++
+            await supabase.from('bookings').update(bookingData).eq('id', existing.id);
+            updated++;
           } else {
-            await supabase.from('bookings').insert(bookingData)
-            created++
+            await supabase.from('bookings').insert(bookingData);
+            created++;
           }
         }
 
@@ -484,20 +468,18 @@ serve(async (req) => {
               ...feed.sync_stats,
               total_syncs: (feed.sync_stats?.total_syncs || 0) + 1,
               successful_syncs: (feed.sync_stats?.successful_syncs || 0) + 1,
-              bookings_created:
-                (feed.sync_stats?.bookings_created || 0) + created,
-              bookings_updated:
-                (feed.sync_stats?.bookings_updated || 0) + updated,
+              bookings_created: (feed.sync_stats?.bookings_created || 0) + created,
+              bookings_updated: (feed.sync_stats?.bookings_updated || 0) + updated,
             },
           })
-          .eq('id', feed.id)
+          .eq('id', feed.id);
 
         results.push({
           feed_id: feed.id,
           status: 'success',
           created,
           updated,
-        })
+        });
       } catch (error) {
         await supabase
           .from('ical_feeds')
@@ -505,45 +487,40 @@ serve(async (req) => {
             last_sync_status: 'error',
             last_sync_error: error.message,
           })
-          .eq('id', feed.id)
+          .eq('id', feed.id);
 
         results.push({
           feed_id: feed.id,
           status: 'error',
           error: error.message,
-        })
+        });
       }
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
       headers: { 'Content-Type': 'application/json' },
-    })
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-})
+});
 
 function extractGuestName(summary: string): string | null {
-  const patterns = [
-    /Reserved - (.+)/,
-    /Reserved \((.+)\)/,
-    /Airbnb - (.+)/,
-    /VRBO - (.+)/,
-  ]
+  const patterns = [/Reserved - (.+)/, /Reserved \((.+)\)/, /Airbnb - (.+)/, /VRBO - (.+)/];
 
   for (const pattern of patterns) {
-    const match = summary.match(pattern)
-    if (match && match[1]) return match[1].trim()
+    const match = summary.match(pattern);
+    if (match && match[1]) return match[1].trim();
   }
 
-  return null
+  return null;
 }
 
 function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0]
+  return date.toISOString().split('T')[0];
 }
 ```
 
@@ -670,10 +647,10 @@ export function AddICalFeed({ propertyId }: { propertyId: string }) {
 async function syncWithRetry(feedId: string, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      return await icalSyncService.syncFeed(feedId)
+      return await icalSyncService.syncFeed(feedId);
     } catch (error) {
-      if (i === maxRetries - 1) throw error
-      await new Promise((resolve) => setTimeout(resolve, 2 ** i * 1000))
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 2 ** i * 1000));
     }
   }
 }
@@ -684,18 +661,13 @@ async function syncWithRetry(feedId: string, maxRetries = 3) {
 ```typescript
 function validateICalUrl(url: string): boolean {
   // Check if URL is from supported platform
-  const validDomains = [
-    'airbnb.com',
-    'vrbo.com',
-    'booking.com',
-    'homeaway.com',
-  ]
+  const validDomains = ['airbnb.com', 'vrbo.com', 'booking.com', 'homeaway.com'];
 
   try {
-    const urlObj = new URL(url)
-    return validDomains.some((domain) => urlObj.hostname.includes(domain))
+    const urlObj = new URL(url);
+    return validDomains.some(domain => urlObj.hostname.includes(domain));
   } catch {
-    return false
+    return false;
   }
 }
 ```
@@ -739,7 +711,7 @@ CONSTRAINT unique_external_booking UNIQUE (property_id, external_id)
 const { data: syncStats } = await supabase
   .from('ical_feeds')
   .select('sync_stats, last_synced_at, last_sync_status')
-  .eq('property_id', propertyId)
+  .eq('property_id', propertyId);
 
 // Display:
 // - Total syncs

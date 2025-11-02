@@ -15,13 +15,13 @@ This document outlines security measures and scalability strategies for the Clea
 const { data, error } = await supabase.auth.mfa.enroll({
   factorType: 'totp',
   friendlyName: 'Mobile App',
-})
+});
 
 // Verify MFA challenge
 await supabase.auth.mfa.challengeAndVerify({
   factorId: data.id,
   code: '123456',
-})
+});
 ```
 
 #### Row Level Security (RLS)
@@ -61,20 +61,20 @@ CREATE POLICY "Users can update their assigned tasks"
 
 ```typescript
 // Server-side token validation
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server';
 
 export async function verifyToken(request: Request) {
-  const supabase = createServerClient()
+  const supabase = createServerClient();
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error('Unauthorized')
+    throw new Error('Unauthorized');
   }
 
-  return user
+  return user;
 }
 ```
 
@@ -84,23 +84,23 @@ export async function verifyToken(request: Request) {
 
 ```typescript
 // lib/rate-limiter.ts
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, '10 s'),
   analytics: true,
-})
+});
 
 export async function checkRateLimit(identifier: string) {
-  const { success, limit, reset, remaining } = await ratelimit.limit(identifier)
+  const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
 
   if (!success) {
-    throw new Error('Rate limit exceeded')
+    throw new Error('Rate limit exceeded');
   }
 
-  return { limit, reset, remaining }
+  return { limit, reset, remaining };
 }
 ```
 
@@ -108,14 +108,14 @@ export async function checkRateLimit(identifier: string) {
 
 ```typescript
 // app/api/tasks/route.ts
-import { checkRateLimit } from '@/lib/rate-limiter'
-import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const ip = request.ip ?? '127.0.0.1'
+  const ip = request.ip ?? '127.0.0.1';
 
   try {
-    await checkRateLimit(ip)
+    await checkRateLimit(ip);
   } catch (error) {
     return NextResponse.json(
       { error: 'Too many requests' },
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
           'Retry-After': '10',
         },
       }
-    )
+    );
   }
 
   // Process request
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 #### Input Validation
 
 ```typescript
-import { z } from 'zod'
+import { z } from 'zod';
 
 // Define schemas
 const createTaskSchema = z.object({
@@ -144,21 +144,21 @@ const createTaskSchema = z.object({
   property_id: z.string().uuid(),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   due_date: z.string().datetime(),
-})
+});
 
 // Validate input
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const validated = createTaskSchema.parse(body)
-    
+    const body = await request.json();
+    const validated = createTaskSchema.parse(body);
+
     // Process validated data
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation failed', issues: error.errors },
         { status: 400 }
-      )
+      );
     }
   }
 }
@@ -180,9 +180,9 @@ module.exports = {
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
         ],
       },
-    ]
+    ];
   },
-}
+};
 ```
 
 ### 3. Data Protection
@@ -192,36 +192,36 @@ module.exports = {
 Supabase provides encryption at rest by default. For additional sensitive data:
 
 ```typescript
-import crypto from 'crypto'
+import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY! // 32 bytes
-const ALGORITHM = 'aes-256-gcm'
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!; // 32 bytes
+const ALGORITHM = 'aes-256-gcm';
 
 export function encrypt(text: string): string {
-  const iv = crypto.randomBytes(16)
-  const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv)
-  
-  let encrypted = cipher.update(text, 'utf8', 'hex')
-  encrypted += cipher.final('hex')
-  
-  const authTag = cipher.getAuthTag()
-  
-  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  const authTag = cipher.getAuthTag();
+
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
 }
 
 export function decrypt(encryptedText: string): string {
-  const [ivHex, authTagHex, encrypted] = encryptedText.split(':')
-  
-  const iv = Buffer.from(ivHex, 'hex')
-  const authTag = Buffer.from(authTagHex, 'hex')
-  const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv)
-  
-  decipher.setAuthTag(authTag)
-  
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8')
-  decrypted += decipher.final('utf8')
-  
-  return decrypted
+  const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+
+  const iv = Buffer.from(ivHex, 'hex');
+  const authTag = Buffer.from(authTagHex, 'hex');
+  const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+
+  decipher.setAuthTag(authTag);
+
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+
+  return decrypted;
 }
 ```
 
@@ -230,14 +230,14 @@ export function decrypt(encryptedText: string): string {
 ```typescript
 export function maskPhone(phone: string): string {
   // +1234567890 → +1234***890
-  return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1***$3')
+  return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1***$3');
 }
 
 export function maskEmail(email: string): string {
   // user@example.com → u***r@example.com
-  const [local, domain] = email.split('@')
-  const masked = local[0] + '***' + local[local.length - 1]
-  return `${masked}@${domain}`
+  const [local, domain] = email.split('@');
+  const masked = local[0] + '***' + local[local.length - 1];
+  return `${masked}@${domain}`;
 }
 ```
 
@@ -246,18 +246,18 @@ export function maskEmail(email: string): string {
 ```typescript
 // Validate file type and size
 export function validateFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 5 * 1024 * 1024 // 5MB
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: 'Invalid file type' }
+    return { valid: false, error: 'Invalid file type' };
   }
 
   if (file.size > maxSize) {
-    return { valid: false, error: 'File too large (max 5MB)' }
+    return { valid: false, error: 'File too large (max 5MB)' };
   }
 
-  return { valid: true }
+  return { valid: true };
 }
 
 // Scan for malware (using ClamAV or similar)
@@ -287,17 +287,17 @@ DATABASE_URL_STAGING=postgresql://...
 ```typescript
 // Rotate API keys regularly
 export async function rotateApiKey(userId: string) {
-  const newKey = crypto.randomBytes(32).toString('hex')
-  
+  const newKey = crypto.randomBytes(32).toString('hex');
+
   await supabase
     .from('api_keys')
     .update({
       key: newKey,
       rotated_at: new Date().toISOString(),
     })
-    .eq('user_id', userId)
-  
-  return newKey
+    .eq('user_id', userId);
+
+  return newKey;
 }
 ```
 
@@ -307,16 +307,12 @@ export async function rotateApiKey(userId: string) {
 
 ```typescript
 // ✅ Good - Parameterized query
-const { data, error } = await supabase
-  .from('tasks')
-  .select('*')
-  .eq('id', taskId) // Safe
+const { data, error } = await supabase.from('tasks').select('*').eq('id', taskId); // Safe
 
 // ❌ Bad - String interpolation
-const { data, error } = await supabase
-  .rpc('execute_sql', {
-    query: `SELECT * FROM tasks WHERE id = '${taskId}'` // Vulnerable!
-  })
+const { data, error } = await supabase.rpc('execute_sql', {
+  query: `SELECT * FROM tasks WHERE id = '${taskId}'`, // Vulnerable!
+});
 ```
 
 ### 6. XSS Prevention
@@ -341,15 +337,12 @@ export function sanitizeHtml(html: string): string {
 ```typescript
 // Generate CSRF token
 export function generateCSRFToken(): string {
-  return crypto.randomBytes(32).toString('hex')
+  return crypto.randomBytes(32).toString('hex');
 }
 
 // Validate CSRF token
 export function validateCSRFToken(token: string, sessionToken: string): boolean {
-  return crypto.timingSafeEqual(
-    Buffer.from(token),
-    Buffer.from(sessionToken)
-  )
+  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(sessionToken));
 }
 ```
 
@@ -378,15 +371,15 @@ CREATE INDEX idx_audit_logs_resource ON public.audit_logs(resource_type, resourc
 ```typescript
 // Log actions
 export async function logAudit(data: {
-  userId: string
-  action: string
-  resourceType: string
-  resourceId: string
-  changes?: any
-  request: Request
+  userId: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  changes?: any;
+  request: Request;
 }) {
-  const ip = request.headers.get('x-forwarded-for') || 'unknown'
-  const userAgent = request.headers.get('user-agent') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   await supabase.from('audit_logs').insert({
     user_id: data.userId,
@@ -396,7 +389,7 @@ export async function logAudit(data: {
     changes: data.changes,
     ip_address: ip,
     user_agent: userAgent,
-  })
+  });
 }
 ```
 
@@ -428,13 +421,10 @@ CREATE INDEX idx_properties_active ON public.properties(owner_id)
 const { data } = await supabase
   .from('tasks')
   .select('id, title, status, due_date')
-  .eq('assigned_to', userId)
+  .eq('assigned_to', userId);
 
 // ❌ Bad - Fetch all columns
-const { data } = await supabase
-  .from('tasks')
-  .select('*')
-  .eq('assigned_to', userId)
+const { data } = await supabase.from('tasks').select('*').eq('assigned_to', userId);
 ```
 
 #### Connection Pooling
@@ -442,14 +432,14 @@ const { data } = await supabase
 Supabase handles connection pooling automatically, but for direct PostgreSQL connections:
 
 ```typescript
-import { Pool } from 'pg'
+import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20, // Maximum number of connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-})
+});
 ```
 
 ### 2. Caching Strategy
@@ -457,9 +447,9 @@ const pool = new Pool({
 #### Redis Caching
 
 ```typescript
-import { Redis } from '@upstash/redis'
+import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv()
+const redis = Redis.fromEnv();
 
 export async function getCached<T>(
   key: string,
@@ -467,16 +457,16 @@ export async function getCached<T>(
   ttl: number = 3600
 ): Promise<T> {
   // Try to get from cache
-  const cached = await redis.get<T>(key)
-  if (cached) return cached
+  const cached = await redis.get<T>(key);
+  if (cached) return cached;
 
   // Fetch fresh data
-  const data = await fetcher()
+  const data = await fetcher();
 
   // Store in cache
-  await redis.setex(key, ttl, data)
+  await redis.setex(key, ttl, data);
 
-  return data
+  return data;
 }
 
 // Usage
@@ -484,7 +474,7 @@ const tasks = await getCached(
   `tasks:${userId}`,
   () => fetchTasksFromDB(userId),
   300 // 5 minutes
-)
+);
 ```
 
 #### React Query Caching
@@ -499,7 +489,7 @@ const queryClient = new QueryClient({
       retry: 1,
     },
   },
-})
+});
 ```
 
 ### 3. Load Balancing
@@ -536,33 +526,33 @@ module.exports = {
     loader: 'cloudinary', // or 'imgix', 'akamai'
     path: 'https://your-cdn.cloudfront.net/',
   },
-}
+};
 ```
 
 ### 5. Background Job Processing
 
 ```typescript
 // Use queue for heavy tasks
-import { Queue } from 'bullmq'
+import { Queue } from 'bullmq';
 
 const taskQueue = new Queue('tasks', {
   connection: {
     host: process.env.REDIS_HOST,
     port: 6379,
   },
-})
+});
 
 // Add job to queue
 await taskQueue.add('generate-tasks', {
   bookingId: 'booking-123',
-})
+});
 
 // Process jobs in worker
-const worker = new Worker('tasks', async (job) => {
+const worker = new Worker('tasks', async job => {
   if (job.name === 'generate-tasks') {
-    await generateTasksForBooking(job.data.bookingId)
+    await generateTasksForBooking(job.data.bookingId);
   }
-})
+});
 ```
 
 ### 6. Database Partitioning
@@ -587,11 +577,13 @@ CREATE TABLE tasks_2024_q2 PARTITION OF tasks_partitioned
 ### 7. Horizontal Scaling
 
 **Stateless Application Design:**
+
 - Store session data in database/Redis, not memory
 - Use shared storage for file uploads
 - Design API endpoints to be idempotent
 
 **Microservices Architecture:**
+
 ```
 Frontend (Vercel) → API Gateway
                     ├─ Auth Service (Supabase)
@@ -613,21 +605,21 @@ export async function GET() {
       supabase: await checkSupabase(),
       redis: await checkRedis(),
     },
-  }
+  };
 
-  const isHealthy = Object.values(health.checks).every((v) => v === 'ok')
+  const isHealthy = Object.values(health.checks).every(v => v === 'ok');
 
   return NextResponse.json(health, {
     status: isHealthy ? 200 : 503,
-  })
+  });
 }
 
 async function checkDatabase(): Promise<'ok' | 'error'> {
   try {
-    await supabase.from('tasks').select('id').limit(1)
-    return 'ok'
+    await supabase.from('tasks').select('id').limit(1);
+    return 'ok';
   } catch {
-    return 'error'
+    return 'error';
   }
 }
 ```
@@ -638,10 +630,10 @@ async function checkDatabase(): Promise<'ok' | 'error'> {
 
 ```typescript
 // lib/monitoring.ts
-import * as Sentry from '@sentry/nextjs'
+import * as Sentry from '@sentry/nextjs';
 
 export function trackPerformance(metricName: string, value: number) {
-  Sentry.metrics.gauge(metricName, value)
+  Sentry.metrics.gauge(metricName, value);
 }
 
 export function trackDatabaseQuery(query: string, duration: number) {
@@ -649,7 +641,7 @@ export function trackDatabaseQuery(query: string, duration: number) {
     Sentry.captureMessage(`Slow query: ${query}`, {
       level: 'warning',
       tags: { duration },
-    })
+    });
   }
 }
 ```

@@ -36,16 +36,15 @@ npm install @supabase/auth-ui-react @supabase/auth-ui-shared
 Create `lib/supabase/client.ts`:
 
 ```typescript
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 // Client component usage
-export const createClient = () => createClientComponentClient()
+export const createClient = () => createClientComponentClient();
 
 // Server component usage
-export const createServerClient = () => 
-  createServerComponentClient({ cookies })
+export const createServerClient = () => createServerComponentClient({ cookies });
 
 // Types
 export type Database = {
@@ -53,21 +52,21 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
-          id: string
-          email: string | null
-          phone: string | null
-          full_name: string
-          avatar_url: string | null
-          role: 'admin' | 'manager' | 'cleaner' | 'guest'
+          id: string;
+          email: string | null;
+          phone: string | null;
+          full_name: string;
+          avatar_url: string | null;
+          role: 'admin' | 'manager' | 'cleaner' | 'guest';
           // ... other fields
-        }
-        Insert: Omit<Row, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Insert>
-      }
+        };
+        Insert: Omit<Row, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Insert>;
+      };
       // ... other tables
-    }
-  }
-}
+    };
+  };
+};
 ```
 
 ### 3. Middleware for Auth Protection
@@ -75,50 +74,44 @@ export type Database = {
 Create `middleware.ts` in project root:
 
 ```typescript
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
 
   // Refresh session if expired
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   // Protect routes
-  const protectedPaths = ['/dashboard', '/tasks', '/bookings', '/settings']
-  const isProtectedPath = protectedPaths.some(path => 
-    req.nextUrl.pathname.startsWith(path)
-  )
+  const protectedPaths = ['/dashboard', '/tasks', '/bookings', '/settings'];
+  const isProtectedPath = protectedPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
   if (isProtectedPath && !session) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/login'
-    redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = '/login';
+    redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Redirect authenticated users away from auth pages
-  const authPaths = ['/login', '/signup']
-  const isAuthPath = authPaths.some(path => 
-    req.nextUrl.pathname.startsWith(path)
-  )
+  const authPaths = ['/login', '/signup'];
+  const isAuthPath = authPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
   if (isAuthPath && session) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
-  return res
+  return res;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+};
 ```
 
 ## Phone OTP Authentication
@@ -148,7 +141,7 @@ export default function PhoneLogin() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -160,7 +153,7 @@ export default function PhoneLogin() {
     try {
       // Validate phone format (E.164)
       const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`
-      
+
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
         options: {
@@ -185,7 +178,7 @@ export default function PhoneLogin() {
 
     try {
       const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`
-      
+
       const { data, error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: otp,
@@ -295,29 +288,29 @@ Implement rate limiting to prevent abuse:
 
 ```typescript
 // lib/rate-limit.ts
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client';
 
-const rateLimits = new Map<string, { count: number; resetAt: number }>()
+const rateLimits = new Map<string, { count: number; resetAt: number }>();
 
 export async function checkRateLimit(
   identifier: string,
   maxAttempts: number = 5,
   windowMs: number = 15 * 60 * 1000 // 15 minutes
 ): Promise<{ allowed: boolean; resetAt: number }> {
-  const now = Date.now()
-  const record = rateLimits.get(identifier)
+  const now = Date.now();
+  const record = rateLimits.get(identifier);
 
   if (!record || now > record.resetAt) {
-    rateLimits.set(identifier, { count: 1, resetAt: now + windowMs })
-    return { allowed: true, resetAt: now + windowMs }
+    rateLimits.set(identifier, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, resetAt: now + windowMs };
   }
 
   if (record.count >= maxAttempts) {
-    return { allowed: false, resetAt: record.resetAt }
+    return { allowed: false, resetAt: record.resetAt };
   }
 
-  record.count++
-  return { allowed: true, resetAt: record.resetAt }
+  record.count++;
+  return { allowed: true, resetAt: record.resetAt };
 }
 ```
 
@@ -342,7 +335,7 @@ export default function EmailSignup() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -467,7 +460,7 @@ export default function EmailLogin() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -623,21 +616,21 @@ export default function OAuthButtons() {
 Create `app/auth/callback/route.ts`:
 
 ```typescript
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
 
   if (code) {
-    const supabase = createRouteHandlerClient({ cookies })
-    await supabase.auth.exchangeCodeForSession(code)
+    const supabase = createRouteHandlerClient({ cookies });
+    await supabase.auth.exchangeCodeForSession(code);
   }
 
   // Redirect to dashboard or original destination
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  return NextResponse.redirect(new URL('/dashboard', request.url));
 }
 ```
 
@@ -752,10 +745,10 @@ export default function DashboardPage() {
 const handlePasswordReset = async (email: string) => {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/auth/reset-password`,
-  })
+  });
 
-  if (error) throw error
-}
+  if (error) throw error;
+};
 ```
 
 ### Reset Password Page
@@ -826,37 +819,41 @@ export default function ResetPasswordPage() {
 ### 2. Input Validation
 
 ```typescript
-import { z } from 'zod'
+import { z } from 'zod';
 
-const phoneSchema = z.string().regex(/^\+[1-9]\d{1,14}$/, 'Invalid phone format')
-const emailSchema = z.string().email('Invalid email')
-const passwordSchema = z.string().min(8).regex(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-  'Password must contain uppercase, lowercase, and number'
-)
+const phoneSchema = z.string().regex(/^\+[1-9]\d{1,14}$/, 'Invalid phone format');
+const emailSchema = z.string().email('Invalid email');
+const passwordSchema = z
+  .string()
+  .min(8)
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+    'Password must contain uppercase, lowercase, and number'
+  );
 ```
 
 ### 3. CAPTCHA Integration
 
 ```typescript
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client';
 
 const handleSignUpWithCaptcha = async (email: string, password: string, captchaToken: string) => {
-  const supabase = createClient()
-  
+  const supabase = createClient();
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       captchaToken,
     },
-  })
-}
+  });
+};
 ```
 
 ### 4. Session Timeout
 
 Configure in Supabase Dashboard:
+
 - JWT expiry: 3600 seconds (1 hour)
 - Refresh token rotation: Enabled
 - Reuse interval: 10 seconds
@@ -866,51 +863,51 @@ Configure in Supabase Dashboard:
 ### Unit Tests
 
 ```typescript
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client';
 
 describe('Authentication', () => {
   it('should sign up with email', async () => {
-    const supabase = createClient()
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email: 'test@example.com',
       password: 'password123',
-    })
-    
-    expect(error).toBeNull()
-    expect(data.user).toBeDefined()
-  })
+    });
+
+    expect(error).toBeNull();
+    expect(data.user).toBeDefined();
+  });
 
   it('should sign in with phone OTP', async () => {
-    const supabase = createClient()
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       phone: '+1234567890',
-    })
-    
-    expect(error).toBeNull()
-  })
-})
+    });
+
+    expect(error).toBeNull();
+  });
+});
 ```
 
 ### E2E Tests
 
 ```typescript
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
 test('phone authentication flow', async ({ page }) => {
-  await page.goto('/login')
-  
+  await page.goto('/login');
+
   // Enter phone number
-  await page.fill('input[type="tel"]', '+1234567890')
-  await page.click('button:has-text("Send Code")')
-  
+  await page.fill('input[type="tel"]', '+1234567890');
+  await page.click('button:has-text("Send Code")');
+
   // Enter OTP
-  await expect(page.locator('input[placeholder*="code"]')).toBeVisible()
-  await page.fill('input[placeholder*="code"]', '123456')
-  await page.click('button:has-text("Verify")')
-  
+  await expect(page.locator('input[placeholder*="code"]')).toBeVisible();
+  await page.fill('input[placeholder*="code"]', '123456');
+  await page.click('button:has-text("Verify")');
+
   // Should redirect to dashboard
-  await expect(page).toHaveURL('/dashboard')
-})
+  await expect(page).toHaveURL('/dashboard');
+});
 ```
 
 ## Troubleshooting

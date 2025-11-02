@@ -69,6 +69,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 **Find your Supabase credentials:**
+
 - Go to Project Settings → API
 - Copy the Project URL and anon/public key
 - Copy the service_role key (keep this secret!)
@@ -114,8 +115,8 @@ RLS policies are included in the migration but verify they're enabled:
 
 ```sql
 -- Check RLS status
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
+SELECT schemaname, tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 
 -- Enable RLS for a table if not enabled
@@ -187,6 +188,7 @@ VALUES
 ```
 
 Run seed:
+
 ```bash
 supabase db reset --seed
 ```
@@ -206,6 +208,7 @@ Navigate to Authentication → Providers in Supabase Dashboard:
    - Vonage
 
 3. Configure Mobile Message:
+
    ```
    Account SID: Your Mobile Message Account SID
    Auth Token: Your Mobile Message Auth Token
@@ -216,7 +219,7 @@ Navigate to Authentication → Providers in Supabase Dashboard:
    ```typescript
    const { data, error } = await supabase.auth.signInWithOtp({
      phone: '+1234567890',
-   })
+   });
    ```
 
 #### Email Authentication
@@ -246,10 +249,10 @@ Go to Authentication → Settings:
 
 ```
 Site URL: https://yourdomain.com (or http://localhost:3000 for dev)
-Redirect URLs: 
+Redirect URLs:
   - https://yourdomain.com/**
   - http://localhost:3000/**
-  
+
 JWT Expiry: 3600 seconds (1 hour)
 Refresh Token Rotation: Enabled
 Reuse Interval: 10 seconds
@@ -272,10 +275,10 @@ npm install @supabase/supabase-js @supabase/auth-helpers-nextjs
 Create Supabase client (`lib/supabase/client.ts`):
 
 ```typescript
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { createClient } from '@supabase/supabase-js'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 
-export const supabaseClient = createClientComponentClient()
+export const supabaseClient = createClientComponentClient();
 
 // For server-side operations with service role
 export const supabaseAdmin = createClient(
@@ -284,10 +287,10 @@ export const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
-)
+);
 ```
 
 ## Edge Functions Setup
@@ -307,43 +310,43 @@ supabase functions new process-booking-change
 Create `supabase/functions/sync-ical-bookings/index.ts`:
 
 ```typescript
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import * as ical from 'https://esm.sh/node-ical@0.16.1'
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import * as ical from 'https://esm.sh/node-ical@0.16.1';
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-serve(async (req) => {
+serve(async req => {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
     // Get all active iCal feeds
     const { data: feeds, error: feedsError } = await supabase
       .from('ical_feeds')
       .select('*')
       .eq('is_active', true)
-      .is('deleted_at', null)
-    
-    if (feedsError) throw feedsError
-    
-    const results = []
-    
+      .is('deleted_at', null);
+
+    if (feedsError) throw feedsError;
+
+    const results = [];
+
     for (const feed of feeds || []) {
       try {
         // Fetch iCal feed
-        const response = await fetch(feed.feed_url)
-        const icalData = await response.text()
-        
+        const response = await fetch(feed.feed_url);
+        const icalData = await response.text();
+
         // Parse iCal
-        const events = await ical.async.parseICS(icalData)
-        
-        let created = 0
-        let updated = 0
-        
+        const events = await ical.async.parseICS(icalData);
+
+        let created = 0;
+        let updated = 0;
+
         for (const [uid, event] of Object.entries(events)) {
-          if (event.type !== 'VEVENT') continue
-          
+          if (event.type !== 'VEVENT') continue;
+
           const bookingData = {
             property_id: feed.property_id,
             ical_feed_id: feed.id,
@@ -355,28 +358,26 @@ serve(async (req) => {
             booking_source: feed.platform,
             raw_ical_data: JSON.stringify(event),
             synced_at: new Date().toISOString(),
-          }
-          
+          };
+
           // Upsert booking
-          const { error: upsertError } = await supabase
-            .from('bookings')
-            .upsert(bookingData, {
-              onConflict: 'property_id,external_id',
-              ignoreDuplicates: false,
-            })
-          
+          const { error: upsertError } = await supabase.from('bookings').upsert(bookingData, {
+            onConflict: 'property_id,external_id',
+            ignoreDuplicates: false,
+          });
+
           if (!upsertError) {
             // Check if it was created or updated
             const { count } = await supabase
               .from('bookings')
               .select('*', { count: 'exact', head: true })
-              .eq('external_id', uid)
-            
-            if (count === 1) created++
-            else updated++
+              .eq('external_id', uid);
+
+            if (count === 1) created++;
+            else updated++;
           }
         }
-        
+
         // Update feed sync status
         await supabase
           .from('ical_feeds')
@@ -391,16 +392,15 @@ serve(async (req) => {
               bookings_updated: (feed.sync_stats?.bookings_updated || 0) + updated,
             },
           })
-          .eq('id', feed.id)
-        
+          .eq('id', feed.id);
+
         results.push({
           feed_id: feed.id,
           feed_name: feed.feed_name,
           status: 'success',
           bookings_created: created,
           bookings_updated: updated,
-        })
-        
+        });
       } catch (error) {
         // Update feed with error
         await supabase
@@ -414,29 +414,27 @@ serve(async (req) => {
               failed_syncs: (feed.sync_stats?.failed_syncs || 0) + 1,
             },
           })
-          .eq('id', feed.id)
-        
+          .eq('id', feed.id);
+
         results.push({
           feed_id: feed.id,
           feed_name: feed.feed_name,
           status: 'error',
           error: error.message,
-        })
+        });
       }
     }
-    
-    return new Response(
-      JSON.stringify({ success: true, results }),
-      { headers: { 'Content-Type': 'application/json' } }
-    )
-    
+
+    return new Response(JSON.stringify({ success: true, results }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-})
+});
 ```
 
 ### 3. Deploy Edge Functions
@@ -513,8 +511,8 @@ Navigate to Database → Replication in Supabase Dashboard:
 ### 2. Subscribe to Realtime Updates in Next.js
 
 ```typescript
-import { useEffect } from 'react'
-import { supabaseClient } from '@/lib/supabase/client'
+import { useEffect } from 'react';
+import { supabaseClient } from '@/lib/supabase/client';
 
 export function useRealtimeTasks(userId: string) {
   useEffect(() => {
@@ -529,17 +527,17 @@ export function useRealtimeTasks(userId: string) {
           table: 'tasks',
           filter: `assigned_to=eq.${userId}`,
         },
-        (payload) => {
-          console.log('Task change received:', payload)
+        payload => {
+          console.log('Task change received:', payload);
           // Update UI state
         }
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabaseClient.removeChannel(channel)
-    }
-  }, [userId])
+      supabaseClient.removeChannel(channel);
+    };
+  }, [userId]);
 }
 ```
 
@@ -547,20 +545,20 @@ export function useRealtimeTasks(userId: string) {
 
 ```typescript
 // Broadcast presence (who's online)
-const channel = supabaseClient.channel('room:123')
+const channel = supabaseClient.channel('room:123');
 
 // Track presence
-await channel.subscribe(async (status) => {
+await channel.subscribe(async status => {
   if (status === 'SUBSCRIBED') {
-    await channel.track({ user_id: userId, online_at: new Date() })
+    await channel.track({ user_id: userId, online_at: new Date() });
   }
-})
+});
 
 // Listen to presence
 channel.on('presence', { event: 'sync' }, () => {
-  const presenceState = channel.presenceState()
-  console.log('Online users:', presenceState)
-})
+  const presenceState = channel.presenceState();
+  console.log('Online users:', presenceState);
+});
 ```
 
 ## Storage Configuration
@@ -595,27 +593,25 @@ USING (bucket_id = 'task-attachments');
 ### 2. Upload Files from Next.js
 
 ```typescript
-import { supabaseClient } from '@/lib/supabase/client'
+import { supabaseClient } from '@/lib/supabase/client';
 
 async function uploadTaskAttachment(file: File, taskId: string) {
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${taskId}/${Date.now()}.${fileExt}`
-  
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${taskId}/${Date.now()}.${fileExt}`;
+
   const { data, error } = await supabaseClient.storage
     .from('task-attachments')
     .upload(fileName, file, {
       cacheControl: '3600',
       upsert: false,
-    })
-  
-  if (error) throw error
-  
+    });
+
+  if (error) throw error;
+
   // Get public URL
-  const { data: urlData } = supabaseClient.storage
-    .from('task-attachments')
-    .getPublicUrl(fileName)
-  
-  return urlData.publicUrl
+  const { data: urlData } = supabaseClient.storage.from('task-attachments').getPublicUrl(fileName);
+
+  return urlData.publicUrl;
 }
 ```
 

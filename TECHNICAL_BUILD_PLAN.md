@@ -23,9 +23,11 @@ This Technical Build Plan provides a detailed, prioritized roadmap for implement
 ## Phase 1: Project Setup & Infrastructure (Week 1)
 
 ### 1.1 Initial Project Configuration
+
 **Priority: P0 | Estimate: M | Dependencies: None**
 
 **Tasks:**
+
 - [ ] Initialize Next.js 14+ application with TypeScript and App Router
 - [ ] Configure Tailwind CSS for styling
 - [ ] Set up ESLint and Prettier for code quality
@@ -34,6 +36,7 @@ This Technical Build Plan provides a detailed, prioritized roadmap for implement
 - [ ] Set up package.json with all required dependencies
 
 **Dependencies to Install:**
+
 ```bash
 @supabase/supabase-js @supabase/auth-helpers-nextjs
 @tanstack/react-query
@@ -43,21 +46,25 @@ axios node-ical next-pwa
 ```
 
 **Acceptance Criteria:**
+
 - Next.js app runs successfully on localhost:3000
 - All dependencies installed and package.json configured
 - Project structure matches Next.js 14 App Router conventions
 - ESLint passes with no errors
 
 **References:**
+
 - GETTING_STARTED.md (lines 18-87)
 - NEXTJS_FRONTEND.md (project structure)
 
 ---
 
 ### 1.2 Supabase Project Setup
+
 **Priority: P0 | Estimate: M | Dependencies: 1.1**
 
 **Tasks:**
+
 - [ ] Create Supabase project on supabase.com
 - [ ] Install and configure Supabase CLI
 - [ ] Initialize local Supabase project with `supabase init`
@@ -66,6 +73,7 @@ axios node-ical next-pwa
 - [ ] Create Supabase client utilities for browser and server
 
 **Environment Variables Required:**
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -74,21 +82,25 @@ NEXT_PUBLIC_APP_URL=
 ```
 
 **Acceptance Criteria:**
+
 - Supabase project accessible via dashboard
 - Environment variables configured and loading correctly
 - Supabase CLI can connect to remote project
 - Basic Supabase client can make test queries
 
 **References:**
+
 - SUPABASE_SETUP.md (lines 1-75)
 - ARCHITECTURE.md (Backend setup)
 
 ---
 
 ### 1.3 Database Schema Implementation
+
 **Priority: P0 | Estimate: L | Dependencies: 1.2**
 
 **Tasks:**
+
 - [ ] Create initial migration file for database schema
 - [ ] Implement `profiles` table with user profile extensions
 - [ ] Create `properties` table for property management
@@ -104,6 +116,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Push migration to remote Supabase project
 
 **Acceptance Criteria:**
+
 - All tables created with correct schema
 - Foreign key constraints properly configured
 - Indexes applied to frequently queried columns
@@ -111,15 +124,18 @@ NEXT_PUBLIC_APP_URL=
 - Database accessible via Supabase dashboard
 
 **References:**
+
 - DATABASE_SCHEMA.md (complete schema)
 - SUPABASE_SETUP.md (migration process)
 
 ---
 
 ### 1.4 Row Level Security (RLS) Policies
+
 **Priority: P0 | Estimate: L | Dependencies: 1.3**
 
 **Tasks:**
+
 - [ ] Enable RLS on all tables
 - [ ] Create RLS policies for `profiles` table (view own, update own, admins view all)
 - [ ] Create RLS policies for `properties` table (owner access, team member access)
@@ -132,6 +148,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Document RLS policy logic
 
 **Acceptance Criteria:**
+
 - RLS enabled on all tables
 - Users can only access their own data or data they have permission for
 - Admins have appropriate elevated permissions
@@ -139,6 +156,7 @@ NEXT_PUBLIC_APP_URL=
 - Policies tested with multiple user accounts
 
 **References:**
+
 - DATABASE_SCHEMA.md (RLS sections for each table)
 - SECURITY_BEST_PRACTICES.md (security patterns)
 
@@ -147,9 +165,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 2: Authentication System (Week 1-2)
 
 ### 2.1 Phone OTP Authentication
+
 **Priority: P0 | Estimate: L | Dependencies: 1.2, 1.3**
 
 **Tasks:**
+
 - [ ] Configure Mobile Message SMS provider in Supabase dashboard
 - [ ] Set up Mobile Message account and obtain credentials
 - [ ] Create phone number input component with validation
@@ -162,6 +182,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add loading states and error handling
 
 **Acceptance Criteria:**
+
 - User can request OTP with phone number
 - SMS arrives within 10 seconds
 - User can verify OTP and create session
@@ -170,15 +191,18 @@ NEXT_PUBLIC_APP_URL=
 - Session persists across page reloads
 
 **References:**
+
 - AUTHENTICATION.md (Phone OTP section, lines 50-200)
 - MOBILE_MESSAGE_SMS.md (Mobile Message setup)
 
 ---
 
 ### 2.2 Email/Password Authentication
+
 **Priority: P1 | Estimate: M | Dependencies: 1.2, 1.3**
 
 **Tasks:**
+
 - [ ] Create email/password signup component
 - [ ] Implement email validation and password strength requirements
 - [ ] Create login component with form validation
@@ -189,6 +213,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add "Remember me" functionality
 
 **Acceptance Criteria:**
+
 - Users can sign up with email/password
 - Users can log in with credentials
 - Password reset flow works end-to-end
@@ -197,15 +222,18 @@ NEXT_PUBLIC_APP_URL=
 - Clear error messages for authentication failures
 
 **References:**
+
 - AUTHENTICATION.md (Email/Password section)
 - SUPABASE_SETUP.md (Auth configuration)
 
 ---
 
 ### 2.3 OAuth Integration (Google/Apple)
+
 **Priority: P2 | Estimate: M | Dependencies: 2.1**
 
 **Tasks:**
+
 - [ ] Configure Google OAuth in Supabase dashboard
 - [ ] Set up Google Cloud Console project and credentials
 - [ ] Configure Apple OAuth in Supabase dashboard (optional)
@@ -216,6 +244,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Test OAuth flow on different devices
 
 **Acceptance Criteria:**
+
 - Users can sign in with Google
 - OAuth flow completes successfully
 - User profile created/updated after OAuth
@@ -223,15 +252,18 @@ NEXT_PUBLIC_APP_URL=
 - OAuth sessions persist correctly
 
 **References:**
+
 - AUTHENTICATION.md (OAuth section, lines 300-450)
 - SUPABASE_SETUP.md (OAuth provider configuration)
 
 ---
 
 ### 2.4 Authentication Middleware & Session Management
+
 **Priority: P0 | Estimate: M | Dependencies: 2.1**
 
 **Tasks:**
+
 - [ ] Create authentication middleware for protected routes
 - [ ] Implement session refresh logic (automatic token renewal)
 - [ ] Create auth context provider for app-wide state
@@ -242,6 +274,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create loading states during session check
 
 **Acceptance Criteria:**
+
 - Protected routes redirect to login if not authenticated
 - Sessions automatically refresh before expiration
 - Auth state accessible via hooks throughout app
@@ -249,6 +282,7 @@ NEXT_PUBLIC_APP_URL=
 - No authentication flicker on page load
 
 **References:**
+
 - AUTHENTICATION.md (Session Management section)
 - NEXTJS_FRONTEND.md (Authentication patterns)
 
@@ -257,9 +291,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 3: Core Backend Features (Week 2-3)
 
 ### 3.1 Property Management API
+
 **Priority: P0 | Estimate: L | Dependencies: 1.4, 2.4**
 
 **Tasks:**
+
 - [ ] Create API routes for property CRUD operations
 - [ ] Implement property creation endpoint with validation
 - [ ] Create property listing endpoint (user's properties only)
@@ -272,6 +308,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Implement RLS enforcement in all endpoints
 
 **API Endpoints:**
+
 - `POST /api/properties` - Create property
 - `GET /api/properties` - List user's properties
 - `GET /api/properties/[id]` - Get property details
@@ -281,6 +318,7 @@ NEXT_PUBLIC_APP_URL=
 - `DELETE /api/properties/[id]/team/[userId]` - Remove team member
 
 **Acceptance Criteria:**
+
 - All CRUD operations work correctly
 - RLS policies prevent unauthorized access
 - Image uploads work for property photos
@@ -289,15 +327,18 @@ NEXT_PUBLIC_APP_URL=
 - Appropriate error responses for failures
 
 **References:**
+
 - DATABASE_SCHEMA.md (properties and team_members tables)
 - ARCHITECTURE.md (API design patterns)
 
 ---
 
 ### 3.2 Task Management API
+
 **Priority: P0 | Estimate: XL | Dependencies: 3.1**
 
 **Tasks:**
+
 - [ ] Create task CRUD API endpoints
 - [ ] Implement task creation with template support
 - [ ] Create task listing with filtering (by status, property, assignee)
@@ -313,6 +354,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add task search functionality
 
 **API Endpoints:**
+
 - `POST /api/tasks` - Create task
 - `GET /api/tasks` - List tasks (with filters)
 - `GET /api/tasks/[id]` - Get task details
@@ -325,6 +367,7 @@ NEXT_PUBLIC_APP_URL=
 - `POST /api/tasks/[id]/assign` - Assign to user
 
 **Acceptance Criteria:**
+
 - All task CRUD operations functional
 - Task filtering works correctly
 - Checklist items can be added/completed
@@ -335,15 +378,18 @@ NEXT_PUBLIC_APP_URL=
 - RLS policies enforced
 
 **References:**
+
 - DATABASE_SCHEMA.md (tasks and related tables)
 - PROJECT_SUMMARY.md (Task Management features)
 
 ---
 
 ### 3.3 Task Template System
+
 **Priority: P1 | Estimate: M | Dependencies: 3.2**
 
 **Tasks:**
+
 - [ ] Create task template CRUD endpoints
 - [ ] Implement template creation with checklist items
 - [ ] Create template listing by property
@@ -354,6 +400,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add default templates for common cleaning tasks
 
 **API Endpoints:**
+
 - `POST /api/templates` - Create template
 - `GET /api/templates` - List templates
 - `GET /api/templates/[id]` - Get template details
@@ -362,6 +409,7 @@ NEXT_PUBLIC_APP_URL=
 - `POST /api/templates/[id]/create-task` - Create task from template
 
 **Acceptance Criteria:**
+
 - Templates can be created and reused
 - Checklist items included in templates
 - Tasks created from templates inherit all attributes
@@ -369,15 +417,18 @@ NEXT_PUBLIC_APP_URL=
 - Template management restricted to property owners
 
 **References:**
+
 - DATABASE_SCHEMA.md (task_templates table)
 - PROJECT_SUMMARY.md (Template-based generation)
 
 ---
 
 ### 3.4 Supabase Edge Functions Setup
+
 **Priority: P1 | Estimate: L | Dependencies: 3.2**
 
 **Tasks:**
+
 - [ ] Initialize Edge Functions directory structure
 - [ ] Create `sync-ical-bookings` function for periodic sync
 - [ ] Create `generate-tasks` function for auto task creation
@@ -390,6 +441,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Configure cron schedules for periodic functions
 
 **Edge Functions:**
+
 1. **sync-ical-bookings**: Runs every 30 minutes, fetches iCal feeds, updates bookings
 2. **generate-tasks**: Triggered after booking sync, creates tasks from bookings
 3. **send-daily-digest**: Runs daily at 8am user timezone, sends SMS digests
@@ -397,6 +449,7 @@ NEXT_PUBLIC_APP_URL=
 5. **cleanup-expired-data**: Runs daily, removes old notifications and logs
 
 **Acceptance Criteria:**
+
 - All Edge Functions deploy successfully
 - Functions execute on schedule (cron)
 - Environment variables accessible in functions
@@ -405,6 +458,7 @@ NEXT_PUBLIC_APP_URL=
 - Performance meets expectations (<5s execution)
 
 **References:**
+
 - SUPABASE_SETUP.md (Edge Functions section, lines 200-350)
 - ARCHITECTURE.md (Edge Functions diagram)
 
@@ -413,9 +467,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 4: Third-Party Integrations (Week 3-4)
 
 ### 4.1 iCal Feed Parser Implementation
+
 **Priority: P0 | Estimate: L | Dependencies: 3.1**
 
 **Tasks:**
+
 - [ ] Install node-ical library for iCal parsing
 - [ ] Create iCal parser utility function
 - [ ] Implement iCal feed fetching with HTTP client
@@ -428,6 +484,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add logging for sync operations
 
 **Parser Fields to Extract:**
+
 - UID (unique booking identifier)
 - DTSTART (check-in date)
 - DTEND (check-out date)
@@ -437,6 +494,7 @@ NEXT_PUBLIC_APP_URL=
 - LOCATION (property address)
 
 **Acceptance Criteria:**
+
 - Parser successfully reads iCal feeds from URLs
 - All standard iCal fields extracted correctly
 - Multiple iCal formats handled (Airbnb, VRBO, etc.)
@@ -446,15 +504,18 @@ NEXT_PUBLIC_APP_URL=
 - Parser validates iCal format
 
 **References:**
+
 - ICAL_INTEGRATION.md (complete implementation)
 - DATABASE_SCHEMA.md (bookings table)
 
 ---
 
 ### 4.2 Booking Synchronization System
+
 **Priority: P0 | Estimate: XL | Dependencies: 4.1, 3.4**
 
 **Tasks:**
+
 - [ ] Create iCal feed management endpoints (add, update, delete feeds)
 - [ ] Implement periodic sync scheduler (every 30 minutes)
 - [ ] Create sync logic: fetch → parse → compare → update database
@@ -468,6 +529,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add sync performance monitoring
 
 **Sync Flow:**
+
 1. Retrieve all active iCal feed URLs from database
 2. Fetch each iCal feed via HTTP
 3. Parse iCal data into booking objects
@@ -479,6 +541,7 @@ NEXT_PUBLIC_APP_URL=
 9. Log sync results
 
 **Acceptance Criteria:**
+
 - Bookings sync automatically every 30 minutes
 - New bookings detected and added to database
 - Updated bookings reflected correctly
@@ -489,15 +552,18 @@ NEXT_PUBLIC_APP_URL=
 - Performance acceptable (<30s for 100 bookings)
 
 **References:**
+
 - ICAL_INTEGRATION.md (Sync implementation, lines 200-400)
 - ARCHITECTURE.md (Booking Sync Flow)
 
 ---
 
 ### 4.3 Automatic Task Generation from Bookings
+
 **Priority: P1 | Estimate: L | Dependencies: 4.2, 3.3**
 
 **Tasks:**
+
 - [ ] Create task generation logic triggered by new bookings
 - [ ] Implement task template selection based on property
 - [ ] Calculate task timing (e.g., cleaning 2 hours before check-in)
@@ -510,6 +576,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add logging for task generation events
 
 **Task Generation Rules:**
+
 - Pre-checkin cleaning: 2-4 hours before guest arrival
 - Post-checkout cleaning: Immediately after checkout time
 - Inspection tasks: 1 day before checkin
@@ -517,6 +584,7 @@ NEXT_PUBLIC_APP_URL=
 - Custom tasks from templates
 
 **Acceptance Criteria:**
+
 - Tasks automatically created for new bookings
 - Task timing calculated correctly based on booking dates
 - Appropriate templates applied per property
@@ -526,15 +594,18 @@ NEXT_PUBLIC_APP_URL=
 - Multiple tasks generated per booking as needed
 
 **References:**
+
 - ICAL_INTEGRATION.md (Task generation section)
 - PROJECT_SUMMARY.md (Automatic task generation)
 
 ---
 
 ### 4.4 Mobile Message SMS Integration
+
 **Priority: P1 | Estimate: M | Dependencies: 3.2**
 
 **Tasks:**
+
 - [ ] Set up Mobile Message account and purchase phone number
 - [ ] Create Mobile Message client utility with credentials
 - [ ] Implement SMS sending service function
@@ -551,12 +622,14 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Implement SMS cost tracking and budgeting
 
 **Message Templates:**
+
 1. **Daily Digest**: "Good morning {name}! You have {count} tasks today: {task_list}. Reply STOP to unsubscribe."
 2. **Task Reminder**: "Reminder: {task_title} due in 2 hours at {property_name}."
 3. **Urgent Alert**: "URGENT: {task_title} requires immediate attention at {property_name}."
 4. **Booking Alert**: "New booking at {property_name}: {guest_name}, {check_in} to {check_out}."
 
 **Acceptance Criteria:**
+
 - SMS messages send successfully
 - Phone numbers properly formatted (E.164)
 - Message templates personalized with user data
@@ -567,15 +640,18 @@ NEXT_PUBLIC_APP_URL=
 - SMS costs monitored and logged
 
 **References:**
+
 - MOBILE_MESSAGE_SMS.md (complete implementation)
 - PROJECT_SUMMARY.md (Notification System features)
 
 ---
 
 ### 4.5 Notification Scheduling System
+
 **Priority: P1 | Estimate: L | Dependencies: 4.4, 3.4**
 
 **Tasks:**
+
 - [ ] Create notification queue system
 - [ ] Implement daily digest scheduler (runs at 8am user timezone)
 - [ ] Create task reminder scheduler (2 hours before due time)
@@ -588,12 +664,14 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Implement notification analytics
 
 **Scheduled Jobs:**
+
 - Daily digest: 8:00 AM in user's timezone
 - Task reminders: 2 hours before task due time
 - Urgent alerts: Immediate (within 1 minute)
 - Booking notifications: Within 5 minutes of booking sync
 
 **Acceptance Criteria:**
+
 - Daily digests sent at correct time for each user's timezone
 - Reminders sent 2 hours before task due time
 - Urgent notifications sent immediately
@@ -604,6 +682,7 @@ NEXT_PUBLIC_APP_URL=
 - No duplicate notifications sent
 
 **References:**
+
 - MOBILE_MESSAGE_SMS.md (Scheduling section, lines 400-550)
 - REALTIME_UPDATES.md (Event-driven notifications)
 
@@ -612,9 +691,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 5: Frontend Development (Week 4-6)
 
 ### 5.1 Layout & Navigation Components
+
 **Priority: P0 | Estimate: M | Dependencies: 2.4**
 
 **Tasks:**
+
 - [ ] Create app layout with navigation
 - [ ] Implement responsive sidebar navigation
 - [ ] Create top navigation bar with user menu
@@ -627,6 +708,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add route highlighting for active page
 
 **Pages to Create:**
+
 - Dashboard (/)
 - Tasks (/tasks)
 - Bookings (/bookings)
@@ -636,6 +718,7 @@ NEXT_PUBLIC_APP_URL=
 - Team (/team)
 
 **Acceptance Criteria:**
+
 - Navigation accessible on all screen sizes
 - Active page highlighted in nav
 - Mobile navigation works smoothly
@@ -645,15 +728,18 @@ NEXT_PUBLIC_APP_URL=
 - Responsive design (mobile, tablet, desktop)
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Component structure, lines 50-150)
 - ARCHITECTURE.md (Directory structure)
 
 ---
 
 ### 5.2 Authentication UI Components
+
 **Priority: P0 | Estimate: L | Dependencies: Phase 2**
 
 **Tasks:**
+
 - [ ] Create login page with phone OTP option
 - [ ] Build OTP verification modal/page
 - [ ] Create email/password login form
@@ -668,6 +754,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create welcome/onboarding flow for new users
 
 **Acceptance Criteria:**
+
 - All authentication flows fully functional in UI
 - Forms have proper validation and error display
 - Loading states visible during authentication
@@ -677,15 +764,18 @@ NEXT_PUBLIC_APP_URL=
 - Error messages clear and helpful
 
 **References:**
+
 - AUTHENTICATION.md (UI components for each auth method)
 - NEXTJS_FRONTEND.md (Authentication components)
 
 ---
 
 ### 5.3 Dashboard & Overview Page
+
 **Priority: P0 | Estimate: L | Dependencies: 5.1, 3.2**
 
 **Tasks:**
+
 - [ ] Create dashboard layout with widget grid
 - [ ] Build task summary cards (pending, in progress, completed)
 - [ ] Create upcoming bookings widget
@@ -698,6 +788,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add loading skeletons for data fetching
 
 **Dashboard Widgets:**
+
 1. Task Overview (counts by status)
 2. Today's Tasks (list with quick actions)
 3. Upcoming Bookings (next 7 days)
@@ -706,6 +797,7 @@ NEXT_PUBLIC_APP_URL=
 6. Team Status (who's online, task assignments)
 
 **Acceptance Criteria:**
+
 - Dashboard loads within 2 seconds
 - All widgets display correct real-time data
 - Quick actions functional
@@ -715,15 +807,18 @@ NEXT_PUBLIC_APP_URL=
 - Empty states shown when no data
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Dashboard components)
 - PROJECT_SUMMARY.md (Dashboard features)
 
 ---
 
 ### 5.4 Task Management UI
+
 **Priority: P0 | Estimate: XL | Dependencies: 5.1, 3.2**
 
 **Tasks:**
+
 - [ ] Create task list page with filters and search
 - [ ] Build task card component with key information
 - [ ] Implement task detail modal/page
@@ -742,6 +837,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add bulk actions (multi-select, bulk update)
 
 **Task List Features:**
+
 - Filter by: status, property, assigned user, priority, date
 - Sort by: due date, priority, created date, property
 - Search: task title, description, property name
@@ -749,6 +845,7 @@ NEXT_PUBLIC_APP_URL=
 - Actions: Complete, Edit, Delete, Duplicate, Assign
 
 **Acceptance Criteria:**
+
 - Task list loads and displays all user tasks
 - Filters and search work correctly
 - Task creation form validates input
@@ -760,15 +857,18 @@ NEXT_PUBLIC_APP_URL=
 - Real-time updates when tasks change
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Task components, lines 200-350)
 - PROJECT_SUMMARY.md (Task Management features)
 
 ---
 
 ### 5.5 Booking Management UI
+
 **Priority: P1 | Estimate: L | Dependencies: 5.1, 4.2**
 
 **Tasks:**
+
 - [ ] Create booking list page
 - [ ] Build booking card component with guest info
 - [ ] Implement booking detail modal
@@ -782,6 +882,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Implement booking conflict warnings
 
 **Booking Features:**
+
 - Filter by: property, date range, status
 - Sort by: check-in date, property, guest name
 - Search: guest name, booking ID
@@ -789,6 +890,7 @@ NEXT_PUBLIC_APP_URL=
 - Actions: View details, Generate tasks, Edit notes
 
 **Acceptance Criteria:**
+
 - Bookings display with correct information
 - iCal feed URLs can be added and managed
 - Manual sync button triggers sync immediately
@@ -798,15 +900,18 @@ NEXT_PUBLIC_APP_URL=
 - Responsive design for all screen sizes
 
 **References:**
+
 - ICAL_INTEGRATION.md (UI components)
 - NEXTJS_FRONTEND.md (Booking components)
 
 ---
 
 ### 5.6 Calendar View
+
 **Priority: P1 | Estimate: L | Dependencies: 5.4, 5.5**
 
 **Tasks:**
+
 - [ ] Install calendar library (react-big-calendar or similar)
 - [ ] Create calendar page layout
 - [ ] Implement month/week/day views
@@ -821,6 +926,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create calendar event creation (click to add task)
 
 **Calendar Features:**
+
 - Task events (colored by priority)
 - Booking events (check-in to check-out)
 - Multi-property view
@@ -830,6 +936,7 @@ NEXT_PUBLIC_APP_URL=
 - Different views: Month, Week, Day, Agenda
 
 **Acceptance Criteria:**
+
 - Calendar displays tasks and bookings correctly
 - Date navigation smooth and responsive
 - Event colors distinguishable
@@ -840,15 +947,18 @@ NEXT_PUBLIC_APP_URL=
 - Performance good with 100+ events
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Calendar implementation)
 - PROJECT_SUMMARY.md (Calendar features)
 
 ---
 
 ### 5.7 Property Management UI
+
 **Priority: P1 | Estimate: M | Dependencies: 5.1, 3.1**
 
 **Tasks:**
+
 - [ ] Create property list page
 - [ ] Build property card component
 - [ ] Implement property detail page
@@ -861,6 +971,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add property deletion with confirmation
 
 **Property Features:**
+
 - Property list with search
 - Add/edit property details
 - Upload property photos
@@ -870,6 +981,7 @@ NEXT_PUBLIC_APP_URL=
 - Property-specific settings
 
 **Acceptance Criteria:**
+
 - Property CRUD operations work in UI
 - Photo uploads function correctly
 - Team members can be added/removed
@@ -878,15 +990,18 @@ NEXT_PUBLIC_APP_URL=
 - Confirmation dialogs for destructive actions
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Property components)
 - DATABASE_SCHEMA.md (properties table)
 
 ---
 
 ### 5.8 Settings & User Profile UI
+
 **Priority: P2 | Estimate: M | Dependencies: 5.1**
 
 **Tasks:**
+
 - [ ] Create settings page layout with tabs
 - [ ] Build profile settings section (name, email, phone, photo)
 - [ ] Implement notification preferences UI
@@ -899,6 +1014,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Build session management (view active sessions, logout)
 
 **Settings Sections:**
+
 1. Profile (personal info, avatar)
 2. Notifications (SMS, email, push preferences)
 3. Security (password, 2FA, sessions)
@@ -906,6 +1022,7 @@ NEXT_PUBLIC_APP_URL=
 5. Account (delete account, export data)
 
 **Acceptance Criteria:**
+
 - All settings editable
 - Changes save successfully
 - Notification preferences apply correctly
@@ -915,6 +1032,7 @@ NEXT_PUBLIC_APP_URL=
 - Account deletion requires confirmation
 
 **References:**
+
 - AUTHENTICATION.md (User profile management)
 - NEXTJS_FRONTEND.md (Settings components)
 
@@ -923,9 +1041,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 6: Real-time Features (Week 6)
 
 ### 6.1 Real-time Task Updates
+
 **Priority: P1 | Estimate: M | Dependencies: 5.4**
 
 **Tasks:**
+
 - [ ] Set up Supabase Realtime channel for tasks
 - [ ] Create useRealtimeTasks hook
 - [ ] Implement subscription to task changes
@@ -939,6 +1059,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Handle reconnection after network issues
 
 **Realtime Events:**
+
 - Task created: Add to list immediately
 - Task updated: Update in list/detail view
 - Task completed: Move to completed section
@@ -946,6 +1067,7 @@ NEXT_PUBLIC_APP_URL=
 - Task assigned: Show notification if assigned to current user
 
 **Acceptance Criteria:**
+
 - Task list updates automatically when changes occur
 - Multiple users see same data in real-time
 - Optimistic updates provide immediate feedback
@@ -955,15 +1077,18 @@ NEXT_PUBLIC_APP_URL=
 - Performance acceptable with frequent updates
 
 **References:**
+
 - REALTIME_UPDATES.md (Complete implementation)
 - ARCHITECTURE.md (Real-time Updates section)
 
 ---
 
 ### 6.2 Real-time Booking Updates
+
 **Priority: P1 | Estimate: S | Dependencies: 5.5, 6.1**
 
 **Tasks:**
+
 - [ ] Set up Supabase Realtime channel for bookings
 - [ ] Create useRealtimeBookings hook
 - [ ] Subscribe to booking changes
@@ -974,6 +1099,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Update calendar view in real-time
 
 **Acceptance Criteria:**
+
 - Booking list updates when sync completes
 - Users see new bookings immediately
 - Toast notifications appear for changes
@@ -981,15 +1107,18 @@ NEXT_PUBLIC_APP_URL=
 - Works across multiple browser tabs
 
 **References:**
+
 - REALTIME_UPDATES.md (Booking subscriptions)
 - ICAL_INTEGRATION.md (Real-time sync updates)
 
 ---
 
 ### 6.3 Presence & Collaboration Features
+
 **Priority: P2 | Estimate: M | Dependencies: 6.1**
 
 **Tasks:**
+
 - [ ] Set up presence tracking channel
 - [ ] Show who's online (team members)
 - [ ] Display who's viewing a task
@@ -1000,6 +1129,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add user avatar indicators
 
 **Acceptance Criteria:**
+
 - Online status shown for team members
 - Task viewers displayed in task detail
 - Editing warnings prevent conflicts
@@ -1007,6 +1137,7 @@ NEXT_PUBLIC_APP_URL=
 - Performance acceptable with 10+ users
 
 **References:**
+
 - REALTIME_UPDATES.md (Presence section, lines 350-450)
 - PROJECT_SUMMARY.md (Collaborative features)
 
@@ -1015,9 +1146,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 7: Progressive Web App (Week 7)
 
 ### 7.1 PWA Configuration
+
 **Priority: P2 | Estimate: M | Dependencies: Phase 5**
 
 **Tasks:**
+
 - [ ] Install and configure next-pwa
 - [ ] Create manifest.json with app metadata
 - [ ] Design app icons (multiple sizes: 192x192, 512x512)
@@ -1031,6 +1164,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Test installation on iOS and Android
 
 **PWA Features:**
+
 - Installable on mobile devices
 - Offline access to previously loaded data
 - Background sync for offline actions
@@ -1038,6 +1172,7 @@ NEXT_PUBLIC_APP_URL=
 - App-like experience (no browser chrome)
 
 **Acceptance Criteria:**
+
 - App installable on iOS and Android
 - Works offline with cached data
 - Install prompt appears appropriately
@@ -1047,15 +1182,18 @@ NEXT_PUBLIC_APP_URL=
 - Offline fallback page functional
 
 **References:**
+
 - NEXTJS_FRONTEND.md (PWA section, lines 450-600)
 - PROJECT_SUMMARY.md (PWA features)
 
 ---
 
 ### 7.2 Offline Support & Sync
+
 **Priority: P2 | Estimate: L | Dependencies: 7.1**
 
 **Tasks:**
+
 - [ ] Implement offline data caching strategy
 - [ ] Create local storage for offline changes
 - [ ] Build background sync for queued actions
@@ -1067,6 +1205,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create offline-first optimistic updates
 
 **Offline Capabilities:**
+
 - View previously loaded tasks and bookings
 - Create/edit tasks offline (syncs when online)
 - Mark tasks complete offline
@@ -1074,6 +1213,7 @@ NEXT_PUBLIC_APP_URL=
 - Cache critical assets
 
 **Acceptance Criteria:**
+
 - App functional without network connection
 - Offline changes sync when connection restored
 - Conflict resolution works correctly
@@ -1082,15 +1222,18 @@ NEXT_PUBLIC_APP_URL=
 - Data consistency maintained after sync
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Offline support)
 - SECURITY_BEST_PRACTICES.md (Offline security)
 
 ---
 
 ### 7.3 Push Notifications (Optional)
+
 **Priority: P3 | Estimate: M | Dependencies: 7.1**
 
 **Tasks:**
+
 - [ ] Configure push notification permissions
 - [ ] Implement push subscription management
 - [ ] Create push notification service worker handler
@@ -1101,6 +1244,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Implement notification icons and badges
 
 **Acceptance Criteria:**
+
 - Users can enable/disable push notifications
 - Notifications appear on device
 - Click opens relevant page in app
@@ -1108,6 +1252,7 @@ NEXT_PUBLIC_APP_URL=
 - Works on iOS and Android
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Push notifications)
 - MOBILE_MESSAGE_SMS.md (Multi-channel notifications)
 
@@ -1116,9 +1261,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 8: Testing & Quality Assurance (Week 7-8)
 
 ### 8.1 Unit Testing
+
 **Priority: P1 | Estimate: L | Dependencies: Phase 3, 5**
 
 **Tasks:**
+
 - [ ] Set up testing framework (Jest + React Testing Library)
 - [ ] Configure test environment
 - [ ] Write unit tests for utility functions
@@ -1131,6 +1278,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Aim for 70%+ code coverage
 
 **Test Categories:**
+
 - Utils: Date formatting, phone validation, text parsing
 - API Routes: CRUD operations, authentication, authorization
 - Components: Rendering, user interactions, state changes
@@ -1138,6 +1286,7 @@ NEXT_PUBLIC_APP_URL=
 - Services: SMS sending, iCal parsing, notification scheduling
 
 **Acceptance Criteria:**
+
 - All critical functions have unit tests
 - Test suite passes completely
 - Code coverage >70%
@@ -1145,15 +1294,18 @@ NEXT_PUBLIC_APP_URL=
 - Tests execute quickly (<30s)
 
 **References:**
+
 - NEXTJS_FRONTEND.md (Testing section)
 - GETTING_STARTED.md (Testing setup)
 
 ---
 
 ### 8.2 Integration Testing
+
 **Priority: P1 | Estimate: M | Dependencies: 8.1**
 
 **Tasks:**
+
 - [ ] Set up integration test environment
 - [ ] Create test database with seed data
 - [ ] Write API integration tests
@@ -1165,6 +1317,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Test Edge Functions
 
 **Integration Test Scenarios:**
+
 - User signup → profile creation → first task
 - Booking sync → task generation → notification
 - Task assignment → notification → completion
@@ -1172,6 +1325,7 @@ NEXT_PUBLIC_APP_URL=
 - iCal feed add → sync → booking display
 
 **Acceptance Criteria:**
+
 - All critical user flows tested
 - Integration tests pass consistently
 - Tests use isolated test database
@@ -1179,15 +1333,18 @@ NEXT_PUBLIC_APP_URL=
 - Tests run in CI/CD pipeline
 
 **References:**
+
 - GETTING_STARTED.md (Testing strategies)
 - SUPABASE_SETUP.md (Test database setup)
 
 ---
 
 ### 8.3 End-to-End Testing
+
 **Priority: P2 | Estimate: L | Dependencies: Phase 5**
 
 **Tasks:**
+
 - [ ] Set up E2E testing framework (Playwright or Cypress)
 - [ ] Configure test environment
 - [ ] Write authentication E2E tests
@@ -1199,6 +1356,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Test cross-browser compatibility
 
 **E2E Test Scenarios:**
+
 - Complete user signup and onboarding
 - Create property and add team member
 - Add iCal feed and trigger sync
@@ -1208,6 +1366,7 @@ NEXT_PUBLIC_APP_URL=
 - Manage settings and preferences
 
 **Acceptance Criteria:**
+
 - All critical user journeys tested
 - Tests run reliably on CI/CD
 - Screenshots/videos captured on failure
@@ -1215,15 +1374,18 @@ NEXT_PUBLIC_APP_URL=
 - Mobile tests pass on simulated devices
 
 **References:**
+
 - NEXTJS_FRONTEND.md (E2E testing)
 - GETTING_STARTED.md (Testing section)
 
 ---
 
 ### 8.4 Performance Testing
+
 **Priority: P2 | Estimate: M | Dependencies: Phase 5**
 
 **Tasks:**
+
 - [ ] Set up performance monitoring (Lighthouse)
 - [ ] Measure page load times
 - [ ] Test Time to Interactive (TTI)
@@ -1236,6 +1398,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create performance monitoring dashboard
 
 **Performance Targets:**
+
 - Page load: <2 seconds
 - Time to Interactive: <3 seconds
 - API response (p95): <200ms
@@ -1243,6 +1406,7 @@ NEXT_PUBLIC_APP_URL=
 - Lighthouse score: >90
 
 **Acceptance Criteria:**
+
 - All pages meet performance targets
 - No performance regressions in CI/CD
 - Slow queries identified and optimized
@@ -1250,15 +1414,18 @@ NEXT_PUBLIC_APP_URL=
 - Performance monitored in production
 
 **References:**
+
 - ARCHITECTURE.md (Performance Targets)
 - SECURITY_BEST_PRACTICES.md (Performance optimization)
 
 ---
 
 ### 8.5 Security Testing
+
 **Priority: P1 | Estimate: M | Dependencies: Phase 2, 3**
 
 **Tasks:**
+
 - [ ] Audit RLS policies for all tables
 - [ ] Test authentication bypass attempts
 - [ ] Verify input validation on all forms
@@ -1272,6 +1439,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Test OAuth flow security
 
 **Security Checklist:**
+
 - [ ] All tables have RLS policies
 - [ ] API routes validate authentication
 - [ ] User input sanitized
@@ -1283,6 +1451,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Rate limiting on auth endpoints
 
 **Acceptance Criteria:**
+
 - Security audit passes
 - No critical vulnerabilities found
 - RLS policies prevent unauthorized access
@@ -1290,6 +1459,7 @@ NEXT_PUBLIC_APP_URL=
 - Security best practices followed
 
 **References:**
+
 - SECURITY_BEST_PRACTICES.md (Complete security guide)
 - AUTHENTICATION.md (Authentication security)
 
@@ -1298,9 +1468,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 9: Deployment & DevOps (Week 8)
 
 ### 9.1 Vercel Deployment Setup
+
 **Priority: P0 | Estimate: M | Dependencies: Phase 5**
 
 **Tasks:**
+
 - [ ] Create Vercel account and link GitHub repo
 - [ ] Configure Vercel project settings
 - [ ] Set up environment variables in Vercel
@@ -1313,6 +1485,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Set up error tracking (Sentry or similar)
 
 **Environment Variables for Vercel:**
+
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
@@ -1322,6 +1495,7 @@ NEXT_PUBLIC_APP_URL=
 - (OAuth credentials if used)
 
 **Acceptance Criteria:**
+
 - Production deployment successful
 - Environment variables configured correctly
 - HTTPS working with valid certificate
@@ -1330,15 +1504,18 @@ NEXT_PUBLIC_APP_URL=
 - Error tracking functional
 
 **References:**
+
 - VERCEL_DEPLOYMENT.md (Complete deployment guide)
 - ARCHITECTURE.md (Deployment architecture)
 
 ---
 
 ### 9.2 Supabase Production Configuration
+
 **Priority: P0 | Estimate: M | Dependencies: 1.3, 3.4**
 
 **Tasks:**
+
 - [ ] Upgrade Supabase to Pro plan (if needed)
 - [ ] Configure production database settings
 - [ ] Set up database backups (automated)
@@ -1351,6 +1528,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Enable database connection pooling
 
 **Production Settings:**
+
 - Database: Enable connection pooling
 - Auth: Configure email templates
 - Storage: Set up buckets with policies
@@ -1358,6 +1536,7 @@ NEXT_PUBLIC_APP_URL=
 - Cron: Schedule sync and notification jobs
 
 **Acceptance Criteria:**
+
 - Production database accessible
 - All Edge Functions deployed and working
 - Scheduled jobs running on schedule
@@ -1366,15 +1545,18 @@ NEXT_PUBLIC_APP_URL=
 - Connection pooling enabled
 
 **References:**
+
 - SUPABASE_SETUP.md (Production configuration)
 - VERCEL_DEPLOYMENT.md (Backend deployment)
 
 ---
 
 ### 9.3 CI/CD Pipeline
+
 **Priority: P1 | Estimate: M | Dependencies: 8.1, 9.1**
 
 **Tasks:**
+
 - [ ] Set up GitHub Actions workflow
 - [ ] Configure CI pipeline (lint, test, build)
 - [ ] Add automated tests to CI
@@ -1387,6 +1569,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Configure deployment notifications
 
 **CI/CD Stages:**
+
 1. Lint: ESLint + Prettier check
 2. Type Check: TypeScript compilation
 3. Test: Run unit + integration tests
@@ -1396,6 +1579,7 @@ NEXT_PUBLIC_APP_URL=
 7. Deploy Functions: Deploy Edge Functions
 
 **Acceptance Criteria:**
+
 - CI runs on all PRs
 - All checks must pass to merge
 - Main branch auto-deploys to production
@@ -1404,15 +1588,18 @@ NEXT_PUBLIC_APP_URL=
 - Team notified of deployment status
 
 **References:**
+
 - VERCEL_DEPLOYMENT.md (CI/CD section)
 - GETTING_STARTED.md (Development workflow)
 
 ---
 
 ### 9.4 Monitoring & Analytics
+
 **Priority: P1 | Estimate: M | Dependencies: 9.1**
 
 **Tasks:**
+
 - [ ] Set up Vercel Analytics
 - [ ] Configure error tracking (Sentry)
 - [ ] Add logging system (structured logs)
@@ -1425,6 +1612,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add user analytics (privacy-compliant)
 
 **Monitoring Metrics:**
+
 - Uptime and availability
 - Page load times
 - API response times
@@ -1435,6 +1623,7 @@ NEXT_PUBLIC_APP_URL=
 - SMS delivery rates
 
 **Acceptance Criteria:**
+
 - All monitoring tools configured
 - Error tracking captures exceptions
 - Alerts sent for critical issues
@@ -1443,15 +1632,18 @@ NEXT_PUBLIC_APP_URL=
 - Analytics tracking user behavior
 
 **References:**
+
 - SECURITY_BEST_PRACTICES.md (Monitoring section)
 - VERCEL_DEPLOYMENT.md (Analytics setup)
 
 ---
 
 ### 9.5 Documentation & Launch Preparation
+
 **Priority: P1 | Estimate: M | Dependencies: All phases**
 
 **Tasks:**
+
 - [ ] Update README with deployment info
 - [ ] Create user documentation/help center
 - [ ] Write admin guide for property managers
@@ -1464,6 +1656,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Create video tutorials (optional)
 
 **Documentation to Create:**
+
 1. User Guide: How to use the app
 2. Admin Guide: Property management best practices
 3. API Documentation: For future integrations
@@ -1471,6 +1664,7 @@ NEXT_PUBLIC_APP_URL=
 5. Troubleshooting: Common issues and solutions
 
 **Acceptance Criteria:**
+
 - README updated with current information
 - User guide covers all features
 - Admin guide helps property managers
@@ -1479,6 +1673,7 @@ NEXT_PUBLIC_APP_URL=
 - Onboarding guide clear for new users
 
 **References:**
+
 - All existing documentation in repository
 - PROJECT_SUMMARY.md (Feature overview)
 
@@ -1487,9 +1682,11 @@ NEXT_PUBLIC_APP_URL=
 ## Phase 10: Post-Launch & Optimization (Ongoing)
 
 ### 10.1 User Feedback & Iteration
+
 **Priority: P2 | Estimate: Ongoing**
 
 **Tasks:**
+
 - [ ] Set up feedback collection mechanism
 - [ ] Create feature request tracking
 - [ ] Monitor user behavior analytics
@@ -1500,6 +1697,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Conduct user interviews (optional)
 
 **Acceptance Criteria:**
+
 - Feedback mechanism in place
 - User issues tracked and prioritized
 - Regular improvement iterations
@@ -1508,9 +1706,11 @@ NEXT_PUBLIC_APP_URL=
 ---
 
 ### 10.2 Performance Optimization
+
 **Priority: P2 | Estimate: Ongoing**
 
 **Tasks:**
+
 - [ ] Analyze slow database queries
 - [ ] Optimize component rendering
 - [ ] Implement additional caching
@@ -1521,6 +1721,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Add Redis caching (if needed)
 
 **Acceptance Criteria:**
+
 - Page load times improve
 - API response times under target
 - Database queries optimized
@@ -1529,9 +1730,11 @@ NEXT_PUBLIC_APP_URL=
 ---
 
 ### 10.3 Feature Enhancements
+
 **Priority: P3 | Estimate: Ongoing**
 
 **Future Features to Consider:**
+
 - [ ] Mobile native app (React Native)
 - [ ] Team chat/messaging
 - [ ] Expense tracking
@@ -1544,6 +1747,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Calendar integrations (Google Calendar, Outlook)
 
 **Prioritization based on:**
+
 - User demand
 - Business value
 - Implementation effort
@@ -1583,6 +1787,7 @@ NEXT_PUBLIC_APP_URL=
 ## Success Metrics
 
 ### Technical Metrics
+
 - [ ] Page load time <2 seconds (p95)
 - [ ] API response time <200ms (p95)
 - [ ] Real-time latency <100ms
@@ -1592,6 +1797,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] Zero critical security vulnerabilities
 
 ### Business Metrics
+
 - [ ] User onboarding completion rate >80%
 - [ ] Daily active users growing
 - [ ] Task completion rate >90%
@@ -1600,6 +1806,7 @@ NEXT_PUBLIC_APP_URL=
 - [ ] User satisfaction score >4.5/5
 
 ### Feature Completeness
+
 - [ ] All P0 tasks completed
 - [ ] All P1 tasks completed
 - [ ] Documentation complete
@@ -1611,11 +1818,13 @@ NEXT_PUBLIC_APP_URL=
 ## Resource Requirements
 
 ### Development Team
+
 - 1 Full-stack developer: 6-8 weeks
 - OR
 - 1 Frontend developer + 1 Backend developer: 4-6 weeks
 
 ### External Services (Monthly Costs)
+
 - Supabase Pro: $25/month
 - Vercel Pro: $20/month
 - Mobile Message SMS: $45-100/month (depends on usage)
@@ -1623,6 +1832,7 @@ NEXT_PUBLIC_APP_URL=
 - **Total: ~$100-150/month** for up to 100 users
 
 ### Tools & Software
+
 - GitHub (version control)
 - Supabase CLI
 - Node.js 18+
@@ -1633,18 +1843,18 @@ NEXT_PUBLIC_APP_URL=
 
 ## Timeline Summary
 
-| Phase | Duration | Priority | Dependencies |
-|-------|----------|----------|--------------|
-| 1. Project Setup & Infrastructure | Week 1 | P0 | None |
-| 2. Authentication System | Week 1-2 | P0 | Phase 1 |
-| 3. Core Backend Features | Week 2-3 | P0 | Phase 1, 2 |
-| 4. Third-Party Integrations | Week 3-4 | P0-P1 | Phase 3 |
-| 5. Frontend Development | Week 4-6 | P0-P1 | Phase 2, 3, 4 |
-| 6. Real-time Features | Week 6 | P1 | Phase 5 |
-| 7. Progressive Web App | Week 7 | P2 | Phase 5 |
-| 8. Testing & QA | Week 7-8 | P1 | Phase 3, 5 |
-| 9. Deployment & DevOps | Week 8 | P0-P1 | Phase 5, 8 |
-| 10. Post-Launch | Ongoing | P2-P3 | Phase 9 |
+| Phase                             | Duration | Priority | Dependencies  |
+| --------------------------------- | -------- | -------- | ------------- |
+| 1. Project Setup & Infrastructure | Week 1   | P0       | None          |
+| 2. Authentication System          | Week 1-2 | P0       | Phase 1       |
+| 3. Core Backend Features          | Week 2-3 | P0       | Phase 1, 2    |
+| 4. Third-Party Integrations       | Week 3-4 | P0-P1    | Phase 3       |
+| 5. Frontend Development           | Week 4-6 | P0-P1    | Phase 2, 3, 4 |
+| 6. Real-time Features             | Week 6   | P1       | Phase 5       |
+| 7. Progressive Web App            | Week 7   | P2       | Phase 5       |
+| 8. Testing & QA                   | Week 7-8 | P1       | Phase 3, 5    |
+| 9. Deployment & DevOps            | Week 8   | P0-P1    | Phase 5, 8    |
+| 10. Post-Launch                   | Ongoing  | P2-P3    | Phase 9       |
 
 **Total MVP Timeline: 6-8 weeks** with 1 experienced full-stack developer
 
@@ -1653,6 +1863,7 @@ NEXT_PUBLIC_APP_URL=
 ## Implementation Notes
 
 ### Best Practices
+
 1. **Commit frequently** - Small, focused commits with clear messages
 2. **Test as you build** - Don't wait until the end to test
 3. **Document as you code** - Update docs when implementing features
@@ -1662,6 +1873,7 @@ NEXT_PUBLIC_APP_URL=
 7. **Error handling** - Implement comprehensive error handling early
 
 ### Common Pitfalls to Avoid
+
 1. Skipping RLS policies (security vulnerability)
 2. Not testing with realistic data volumes
 3. Ignoring mobile responsiveness until late
@@ -1672,6 +1884,7 @@ NEXT_PUBLIC_APP_URL=
 8. Inadequate testing of edge cases
 
 ### Developer Checklist (Per Feature)
+
 - [ ] Feature implements requirements
 - [ ] Code follows project conventions
 - [ ] TypeScript types properly defined
@@ -1690,6 +1903,7 @@ NEXT_PUBLIC_APP_URL=
 ## Getting Started
 
 ### For Co-pilot Implementation:
+
 1. Start with **Phase 1** tasks in order
 2. Complete all P0 tasks before moving to P1
 3. Test each component before moving to next
@@ -1699,6 +1913,7 @@ NEXT_PUBLIC_APP_URL=
 7. Ask for clarification if requirements unclear
 
 ### Quick Reference Links
+
 - Architecture: `ARCHITECTURE.md`
 - Database: `DATABASE_SCHEMA.md`
 - Authentication: `AUTHENTICATION.md`
@@ -1714,9 +1929,9 @@ NEXT_PUBLIC_APP_URL=
 
 ## Revision History
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2025-11-02 | Initial Technical Build Plan | GitHub Copilot |
+| Version | Date       | Changes                      | Author         |
+| ------- | ---------- | ---------------------------- | -------------- |
+| 1.0     | 2025-11-02 | Initial Technical Build Plan | GitHub Copilot |
 
 ---
 
