@@ -22,7 +22,7 @@ This repository contains comprehensive research, documentation, and implementati
 - File storage configuration
 
 **Authentication System**
-- Phone OTP implementation via Twilio
+- Phone OTP implementation via Mobile Message
 - Email/password authentication
 - OAuth integration (Google, Apple)
 - Session management and security
@@ -30,7 +30,7 @@ This repository contains comprehensive research, documentation, and implementati
 
 **Third-Party Integrations**
 - iCal feed parsing for Airbnb/VRBO/Booking.com
-- Twilio SMS for notifications
+- Mobile Message SMS for notifications
 - Automated booking synchronization
 - Task generation from bookings
 
@@ -98,7 +98,7 @@ Each document includes:
   - Edge Functions (Deno)
   - Realtime subscriptions
   - Storage service
-- Twilio (SMS notifications)
+- Mobile Message (SMS notifications)
 
 **Deployment**
 - Vercel (frontend hosting)
@@ -195,8 +195,8 @@ Each document includes:
    - Presence tracking
    - Performance optimization
 
-8. **TWILIO_SMS.md** (21 KB)
-   - Twilio configuration
+8. **MOBILE_MESSAGE_SMS.md** (21 KB)
+   - Mobile Message configuration
    - SMS sending service
    - Message templates
    - Webhook handling
@@ -286,7 +286,7 @@ Each document includes:
   - Analytics
   - SSL/CDN
 
-- **Twilio SMS**: $45/month
+- **Mobile Message SMS**: $45/month
   - 100 users × 2 SMS/day × 30 days
   - ~6,000 messages @ $0.0075/SMS
 
@@ -319,7 +319,7 @@ Each document includes:
 
 ### Phase 4: Integrations (3-4 days)
 - iCal sync implementation
-- Twilio SMS setup
+- Mobile Message SMS setup
 - Real-time updates
 - Edge Functions
 

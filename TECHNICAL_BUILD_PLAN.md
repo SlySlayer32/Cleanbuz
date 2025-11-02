@@ -39,7 +39,7 @@ This Technical Build Plan provides a detailed, prioritized roadmap for implement
 @tanstack/react-query
 react-hook-form zod @hookform/resolvers
 date-fns clsx tailwind-merge lucide-react
-twilio node-ical next-pwa
+axios node-ical next-pwa
 ```
 
 **Acceptance Criteria:**
@@ -150,8 +150,8 @@ NEXT_PUBLIC_APP_URL=
 **Priority: P0 | Estimate: L | Dependencies: 1.2, 1.3**
 
 **Tasks:**
-- [ ] Configure Twilio SMS provider in Supabase dashboard
-- [ ] Set up Twilio account and obtain credentials
+- [ ] Configure Mobile Message SMS provider in Supabase dashboard
+- [ ] Set up Mobile Message account and obtain credentials
 - [ ] Create phone number input component with validation
 - [ ] Implement phone OTP request flow (send code)
 - [ ] Create OTP verification component (6-digit input)
@@ -171,7 +171,7 @@ NEXT_PUBLIC_APP_URL=
 
 **References:**
 - AUTHENTICATION.md (Phone OTP section, lines 50-200)
-- TWILIO_SMS.md (Twilio setup)
+- MOBILE_MESSAGE_SMS.md (Mobile Message setup)
 
 ---
 
@@ -531,12 +531,12 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### 4.4 Twilio SMS Integration
+### 4.4 Mobile Message SMS Integration
 **Priority: P1 | Estimate: M | Dependencies: 3.2**
 
 **Tasks:**
-- [ ] Set up Twilio account and purchase phone number
-- [ ] Create Twilio client utility with credentials
+- [ ] Set up Mobile Message account and purchase phone number
+- [ ] Create Mobile Message client utility with credentials
 - [ ] Implement SMS sending service function
 - [ ] Create phone number validation and formatting
 - [ ] Build notification message templates
@@ -567,7 +567,7 @@ NEXT_PUBLIC_APP_URL=
 - SMS costs monitored and logged
 
 **References:**
-- TWILIO_SMS.md (complete implementation)
+- MOBILE_MESSAGE_SMS.md (complete implementation)
 - PROJECT_SUMMARY.md (Notification System features)
 
 ---
@@ -604,7 +604,7 @@ NEXT_PUBLIC_APP_URL=
 - No duplicate notifications sent
 
 **References:**
-- TWILIO_SMS.md (Scheduling section, lines 400-550)
+- MOBILE_MESSAGE_SMS.md (Scheduling section, lines 400-550)
 - REALTIME_UPDATES.md (Event-driven notifications)
 
 ---
@@ -1109,7 +1109,7 @@ NEXT_PUBLIC_APP_URL=
 
 **References:**
 - NEXTJS_FRONTEND.md (Push notifications)
-- TWILIO_SMS.md (Multi-channel notifications)
+- MOBILE_MESSAGE_SMS.md (Multi-channel notifications)
 
 ---
 
@@ -1316,9 +1316,9 @@ NEXT_PUBLIC_APP_URL=
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
-- TWILIO_ACCOUNT_SID
-- TWILIO_AUTH_TOKEN
-- TWILIO_PHONE_NUMBER
+- MOBILE_MESSAGE_API_KEY
+- MOBILE_MESSAGE_ACCOUNT_ID
+- MOBILE_MESSAGE_SENDER_ID
 - (OAuth credentials if used)
 
 **Acceptance Criteria:**
@@ -1559,7 +1559,7 @@ NEXT_PUBLIC_APP_URL=
    - Risk: External feed URLs may change or become unavailable
    - Mitigation: Implement robust error handling, retry logic, user notifications
 
-2. **Twilio SMS Costs** (Phase 4.4)
+2. **Mobile Message SMS Costs** (Phase 4.4)
    - Risk: SMS costs could escalate with many users
    - Mitigation: Implement cost tracking, user preferences, batch messaging
 
@@ -1573,8 +1573,8 @@ NEXT_PUBLIC_APP_URL=
 
 ### Dependencies & Blockers
 
-- **External Services**: Supabase, Vercel, Twilio availability
-- **API Limits**: Twilio rate limits, iCal feed access frequency
+- **External Services**: Supabase, Vercel, Mobile Message availability
+- **API Limits**: Mobile Message rate limits, iCal feed access frequency
 - **Browser Support**: PWA features may not work on all browsers
 - **Mobile Testing**: Need real devices for iOS/Android testing
 
@@ -1618,7 +1618,7 @@ NEXT_PUBLIC_APP_URL=
 ### External Services (Monthly Costs)
 - Supabase Pro: $25/month
 - Vercel Pro: $20/month
-- Twilio SMS: $45-100/month (depends on usage)
+- Mobile Message SMS: $45-100/month (depends on usage)
 - Domain: $12-15/year
 - **Total: ~$100-150/month** for up to 100 users
 
@@ -1704,7 +1704,7 @@ NEXT_PUBLIC_APP_URL=
 - Authentication: `AUTHENTICATION.md`
 - Supabase: `SUPABASE_SETUP.md`
 - iCal Sync: `ICAL_INTEGRATION.md`
-- SMS: `TWILIO_SMS.md`
+- SMS: `MOBILE_MESSAGE_SMS.md`
 - Frontend: `NEXTJS_FRONTEND.md`
 - Real-time: `REALTIME_UPDATES.md`
 - Deployment: `VERCEL_DEPLOYMENT.md`
