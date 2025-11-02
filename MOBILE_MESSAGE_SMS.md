@@ -1,100 +1,126 @@
-# Twilio SMS Integration Guide
+# Mobile Message SMS Integration Guide
 
 ## Overview
 
-This guide covers integrating Twilio SMS for sending personalized daily notifications, task reminders, and booking alerts in the Cleanbuz application.
+This guide covers integrating Mobile Message SMS (www.mobilemessage.com.au) for sending personalized daily notifications, task reminders, and booking alerts in the Cleanbuz application.
 
-## Twilio Setup
+## Mobile Message Setup
 
-### 1. Create Twilio Account
+### 1. Create Mobile Message Account
 
-1. Sign up at [twilio.com](https://www.twilio.com/try-twilio)
+1. Sign up at [www.mobilemessage.com.au](https://www.mobilemessage.com.au)
 2. Verify your email and phone number
 3. Complete account setup
+4. Access your account dashboard
 
-### 2. Get Credentials
+### 2. Get API Credentials
 
-Navigate to Console Dashboard:
-- **Account SID**: Found on dashboard (e.g., `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
-- **Auth Token**: Found on dashboard (click to reveal)
-- **Phone Number**: Purchase a phone number or use trial number
+Navigate to Account Settings or API Section:
+- **API Key**: Found in your account dashboard or API settings
+- **Account ID**: Your unique account identifier
+- **Sender ID**: Your approved sender name/number
 
-### 3. Purchase Phone Number
+### 3. Configure Sender ID
 
-1. Go to Phone Numbers → Buy a Number
-2. Choose country and capabilities (SMS)
-3. Search for available numbers
-4. Purchase number (~$1-2/month)
+1. Go to Settings → Sender IDs
+2. Register your business name or dedicated number
+3. Wait for approval (typically 24-48 hours)
+4. Use approved sender ID in all messages
 
 ### 4. Configure Environment Variables
 
 Add to `.env.local`:
 
 ```env
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your_auth_token_here
-TWILIO_PHONE_NUMBER=+1234567890
-TWILIO_MESSAGING_SERVICE_SID=MGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (optional)
+MOBILE_MESSAGE_API_KEY=your_api_key_here
+MOBILE_MESSAGE_ACCOUNT_ID=your_account_id
+MOBILE_MESSAGE_SENDER_ID=YourBusiness
+MOBILE_MESSAGE_API_URL=https://api.mobilemessage.com.au/v1
 ```
 
 ## Installation
 
 ```bash
-npm install twilio
+npm install axios
+# or
+npm install node-fetch
 ```
 
 ## Basic Implementation
 
-### Create Twilio Client
+### Create Mobile Message Client
 
-Create `lib/twilio/client.ts`:
+Create `lib/mobilemessage/client.ts`:
 
 ```typescript
-import twilio from 'twilio'
+import axios from 'axios'
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID!
-const authToken = process.env.TWILIO_AUTH_TOKEN!
-const phoneNumber = process.env.TWILIO_PHONE_NUMBER!
+const apiKey = process.env.MOBILE_MESSAGE_API_KEY!
+const accountId = process.env.MOBILE_MESSAGE_ACCOUNT_ID!
+const senderId = process.env.MOBILE_MESSAGE_SENDER_ID!
+const apiUrl = process.env.MOBILE_MESSAGE_API_URL || 'https://api.mobilemessage.com.au/v1'
 
 // Validate required environment variables
-if (!accountSid || !authToken || !phoneNumber) {
-  throw new Error('Missing required Twilio environment variables')
+if (!apiKey || !accountId || !senderId) {
+  throw new Error('Missing required Mobile Message environment variables')
 }
 
-export const twilioClient = twilio(accountSid, authToken)
+export const mobileMessageClient = axios.create({
+  baseURL: apiUrl,
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+  },
+})
 
-export const TWILIO_CONFIG = {
-  phoneNumber,
-  messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+export const MOBILE_MESSAGE_CONFIG = {
+  apiKey,
+  accountId,
+  senderId,
+  apiUrl,
 } as const
 
-// Helper function to format phone numbers
+// Helper function to format phone numbers for Australian numbers
 export function formatPhoneNumber(phone: string): string {
-  // Ensure E.164 format: +[country code][number]
-  if (phone.startsWith('+')) return phone
-  if (phone.startsWith('1')) return `+${phone}`
-  return `+1${phone}` // Default to US
+  // Remove all non-digit characters
+  let cleaned = phone.replace(/\D/g, '')
+  
+  // Handle Australian numbers
+  if (cleaned.startsWith('61')) {
+    // Already has country code
+    return `+${cleaned}`
+  } else if (cleaned.startsWith('0')) {
+    // Australian number with leading 0
+    return `+61${cleaned.substring(1)}`
+  } else if (cleaned.length === 9) {
+    // Australian number without leading 0
+    return `+61${cleaned}`
+  }
+  
+  // For international numbers, assume they include country code
+  return `+${cleaned}`
 }
 ```
 
 ### Send Basic SMS
 
 ```typescript
-import { twilioClient, TWILIO_CONFIG, formatPhoneNumber } from '@/lib/twilio/client'
+import { mobileMessageClient, MOBILE_MESSAGE_CONFIG, formatPhoneNumber } from '@/lib/mobilemessage/client'
 
 export async function sendSMS(to: string, message: string) {
   try {
-    const result = await twilioClient.messages.create({
-      body: message,
-      from: TWILIO_CONFIG.phoneNumber,
+    const result = await mobileMessageClient.post('/messages', {
       to: formatPhoneNumber(to),
+      from: MOBILE_MESSAGE_CONFIG.senderId,
+      message: message,
+      accountId: MOBILE_MESSAGE_CONFIG.accountId,
     })
 
-    console.log('SMS sent:', result.sid)
+    console.log('SMS sent:', result.data.messageId)
     return {
       success: true,
-      sid: result.sid,
-      status: result.status,
+      messageId: result.data.messageId,
+      status: result.data.status,
     }
   } catch (error) {
     console.error('Failed to send SMS:', error)
@@ -110,7 +136,7 @@ export async function sendSMS(to: string, message: string) {
 Create `lib/notifications/sms-service.ts`:
 
 ```typescript
-import { twilioClient, TWILIO_CONFIG, formatPhoneNumber } from '@/lib/twilio/client'
+import { mobileMessageClient, MOBILE_MESSAGE_CONFIG, formatPhoneNumber } from '@/lib/mobilemessage/client'
 import { createClient } from '@/lib/supabase/server'
 
 export interface SMSNotification {
@@ -163,11 +189,12 @@ export class SMSNotificationService {
         profile.full_name
       )
 
-      // Send SMS
-      const result = await twilioClient.messages.create({
-        body: personalizedMessage,
-        from: TWILIO_CONFIG.phoneNumber,
+      // Send SMS via Mobile Message
+      const result = await mobileMessageClient.post('/messages', {
         to: formatPhoneNumber(profile.phone),
+        from: MOBILE_MESSAGE_CONFIG.senderId,
+        message: personalizedMessage,
+        accountId: MOBILE_MESSAGE_CONFIG.accountId,
       })
 
       // Log notification to database
@@ -176,20 +203,18 @@ export class SMSNotificationService {
         task_id: notification.taskId,
         booking_id: notification.bookingId,
         type: 'sms',
-        channel: 'twilio',
+        channel: 'mobilemessage',
         recipient: profile.phone,
         message: personalizedMessage,
         status: 'sent',
-        external_id: result.sid,
+        external_id: result.data.messageId,
         metadata: {
           notification_type: notification.type,
-          price: result.price,
-          price_unit: result.priceUnit,
         },
         sent_at: new Date().toISOString(),
       })
 
-      console.log(`SMS sent to ${profile.phone}:`, result.sid)
+      console.log(`SMS sent to ${profile.phone}:`, result.data.messageId)
     } catch (error) {
       console.error('Failed to send SMS notification:', error)
 
@@ -199,7 +224,7 @@ export class SMSNotificationService {
         task_id: notification.taskId,
         booking_id: notification.bookingId,
         type: 'sms',
-        channel: 'twilio',
+        channel: 'mobilemessage',
         recipient: '',
         message: notification.message,
         status: 'failed',
@@ -394,18 +419,17 @@ Create `supabase/functions/send-daily-digest/index.ts`:
 ```typescript
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import twilio from 'npm:twilio'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!
-const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')!
-const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER')!
+const mobileMessageApiKey = Deno.env.get('MOBILE_MESSAGE_API_KEY')!
+const mobileMessageAccountId = Deno.env.get('MOBILE_MESSAGE_ACCOUNT_ID')!
+const mobileMessageSenderId = Deno.env.get('MOBILE_MESSAGE_SENDER_ID')!
+const mobileMessageApiUrl = Deno.env.get('MOBILE_MESSAGE_API_URL') || 'https://api.mobilemessage.com.au/v1'
 
 serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    const twilioClient = twilio(twilioAccountSid, twilioAuthToken)
 
     // Get all active users with SMS enabled
     const { data: users, error: usersError } = await supabase
@@ -470,30 +494,40 @@ ${urgentCount ? `• ${urgentCount} URGENT ⚠️` : ''}
 
 View tasks: https://yourapp.com/tasks`
 
-      // Send SMS
+      // Send SMS via Mobile Message
       try {
-        const result = await twilioClient.messages.create({
-          body: message,
-          from: twilioPhoneNumber,
-          to: user.phone,
+        const response = await fetch(`${mobileMessageApiUrl}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${mobileMessageApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: user.phone,
+            from: mobileMessageSenderId,
+            message: message,
+            accountId: mobileMessageAccountId,
+          }),
         })
+
+        const result = await response.json()
 
         // Log notification
         await supabase.from('notifications').insert({
           user_id: user.id,
           type: 'sms',
-          channel: 'twilio',
+          channel: 'mobilemessage',
           recipient: user.phone,
           message,
           status: 'sent',
-          external_id: result.sid,
+          external_id: result.messageId,
           sent_at: new Date().toISOString(),
         })
 
         results.push({
           userId: user.id,
           status: 'sent',
-          sid: result.sid,
+          messageId: result.messageId,
         })
       } catch (error) {
         console.error(`Failed to send SMS to ${user.id}:`, error)
@@ -588,49 +622,38 @@ export async function sendTaskReminders() {
 
 ## Webhook Handler for Delivery Status
 
-Create `app/api/webhooks/twilio/route.ts`:
+Create `app/api/webhooks/mobilemessage/route.ts`:
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import twilio from 'twilio'
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData()
-    const messageSid = formData.get('MessageSid') as string
-    const messageStatus = formData.get('MessageStatus') as string
-
-    // Verify webhook authenticity
-    const signature = req.headers.get('x-twilio-signature') || ''
-    const url = req.url
-    const params = Object.fromEntries(formData.entries())
-
-    const isValid = twilio.validateRequest(
-      process.env.TWILIO_AUTH_TOKEN!,
-      signature,
-      url,
-      params
-    )
-
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    const body = await req.json()
+    const messageId = body.messageId
+    const status = body.status
+    
+    // Verify webhook authenticity (implement signature verification if available)
+    const apiKey = req.headers.get('x-api-key')
+    if (apiKey !== process.env.MOBILE_MESSAGE_API_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Update notification status in database
     const supabase = createClient()
-    const updates: any = { status: messageStatus }
+    const updates: any = { status: status }
 
-    if (messageStatus === 'delivered') {
+    if (status === 'delivered') {
       updates.delivered_at = new Date().toISOString()
-    } else if (messageStatus === 'failed' || messageStatus === 'undelivered') {
-      updates.error_message = formData.get('ErrorMessage') || 'Delivery failed'
+    } else if (status === 'failed' || status === 'undelivered') {
+      updates.error_message = body.errorMessage || 'Delivery failed'
     }
 
     await supabase
       .from('notifications')
       .update(updates)
-      .eq('external_id', messageSid)
+      .eq('external_id', messageId)
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -643,11 +666,11 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-Configure webhook URL in Twilio Console:
-- Go to Phone Numbers → Manage → Active Numbers
-- Select your number
-- Under Messaging, set Status Callback URL to:
-  `https://yourapp.com/api/webhooks/twilio`
+Configure webhook URL in Mobile Message Dashboard:
+- Go to Settings → Webhooks or API Configuration
+- Set Delivery Callback URL to:
+  `https://yourapp.com/api/webhooks/mobilemessage`
+- Include your API key in webhook headers for security
 
 ## Best Practices
 
@@ -683,7 +706,7 @@ export function checkSMSRateLimit(userId: string): boolean {
 export async function trackSMSCost(
   userId: string,
   cost: number,
-  currency: string = 'USD'
+  currency: string = 'AUD'
 ) {
   const supabase = createClient()
   
@@ -718,7 +741,7 @@ export async function handleOptOut(phone: string) {
 ### 4. Message Length Optimization
 
 ```typescript
-// SMS is charged per segment (160 chars)
+// SMS is typically charged per segment (160 chars for GSM, 70 for Unicode)
 export function optimizeSMSLength(message: string, maxLength: number = 160): string {
   if (message.length <= maxLength) return message
   
@@ -729,21 +752,19 @@ export function optimizeSMSLength(message: string, maxLength: number = 160): str
 
 ## Testing
 
-### Mock Twilio Client
+### Mock Mobile Message Client
 
 ```typescript
-// lib/twilio/client.test.ts
+// lib/mobilemessage/client.test.ts
 import { jest } from '@jest/globals'
 
-export const mockTwilioClient = {
-  messages: {
-    create: jest.fn().mockResolvedValue({
-      sid: 'SM_mock_message_id',
+export const mockMobileMessageClient = {
+  post: jest.fn().mockResolvedValue({
+    data: {
+      messageId: 'MM_mock_message_id',
       status: 'sent',
-      price: '-0.0075',
-      priceUnit: 'USD',
-    }),
-  },
+    },
+  }),
 }
 ```
 
@@ -760,7 +781,7 @@ describe('SMS Notification Service', () => {
       message: 'Test message',
     })
     
-    expect(mockTwilioClient.messages.create).toHaveBeenCalled()
+    expect(mockMobileMessageClient.post).toHaveBeenCalled()
   })
 
   it('should respect quiet hours', async () => {
@@ -790,34 +811,42 @@ ORDER BY date DESC;
 
 ## Cost Optimization
 
-1. **Use Messaging Services**: Lower cost for high volume
-2. **Optimize message length**: Keep under 160 characters
-3. **Batch notifications**: Group similar messages
+1. **Bulk messaging**: Use batch endpoints if available
+2. **Optimize message length**: Keep under 160 characters when possible
+3. **Group notifications**: Batch similar messages
 4. **Time zone awareness**: Send at optimal times
 5. **Delivery reports**: Track failed messages to avoid retries
+6. **Australian focus**: Benefit from local pricing for Australian numbers
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Messages not delivered**
-   - Verify phone number format (E.164)
-   - Check Twilio account balance
-   - Verify number is not on DND list
+   - Verify phone number format (Australian: +61...)
+   - Check Mobile Message account balance/credits
+   - Verify sender ID is approved
+   - Ensure number is not on DND list
 
 2. **High costs**
-   - Review message length and segments
+   - Review message length and character count
    - Check for duplicate sends
    - Optimize notification frequency
+   - Use Australian sender IDs for better rates
 
 3. **Rate limit errors**
    - Implement exponential backoff
-   - Use messaging service SID
    - Spread sends over time
+   - Check account sending limits
+
+4. **API authentication errors**
+   - Verify API key is correct and active
+   - Check API key permissions
+   - Ensure proper header formatting
 
 ## Resources
 
-- [Twilio SMS Documentation](https://www.twilio.com/docs/sms)
-- [Twilio Node.js SDK](https://www.twilio.com/docs/libraries/node)
-- [Best Practices Guide](https://www.twilio.com/docs/sms/tutorials/best-practices)
-- [Pricing Calculator](https://www.twilio.com/sms/pricing)
+- [Mobile Message Documentation](https://www.mobilemessage.com.au/docs)
+- [Mobile Message API Reference](https://www.mobilemessage.com.au/api)
+- [Australian SMS Best Practices](https://www.mobilemessage.com.au/best-practices)
+- [Pricing Information](https://www.mobilemessage.com.au/pricing)

@@ -58,10 +58,10 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 
-# Twilio Configuration (for SMS notifications)
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_PHONE_NUMBER=your-twilio-phone-number
+# Mobile Message Configuration (for SMS notifications)
+MOBILE_MESSAGE_API_KEY=your-mobile-message-api-key
+MOBILE_MESSAGE_ACCOUNT_ID=your-mobile-message-account-id
+MOBILE_MESSAGE_SENDER_ID=YourBusiness
 
 # Optional: Third-party OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -201,15 +201,15 @@ Navigate to Authentication → Providers in Supabase Dashboard:
 
 1. Enable Phone provider
 2. Choose SMS provider:
-   - **Twilio** (recommended)
+   - **Mobile Message** (recommended)
    - Messagebird
    - Vonage
 
-3. Configure Twilio:
+3. Configure Mobile Message:
    ```
-   Account SID: Your Twilio Account SID
-   Auth Token: Your Twilio Auth Token
-   Phone Number: Your Twilio phone number (e.g., +1234567890)
+   Account SID: Your Mobile Message Account SID
+   Auth Token: Your Mobile Message Auth Token
+   Phone Number: Your Mobile Message phone number (e.g., +1234567890)
    ```
 
 4. Test phone authentication:
@@ -449,9 +449,9 @@ supabase functions deploy sync-ical-bookings
 supabase functions deploy
 
 # Set secrets for functions
-supabase secrets set TWILIO_ACCOUNT_SID=your-sid
-supabase secrets set TWILIO_AUTH_TOKEN=your-token
-supabase secrets set TWILIO_PHONE_NUMBER=your-number
+supabase secrets set MOBILE_MESSAGE_API_KEY=your-api-key
+supabase secrets set MOBILE_MESSAGE_ACCOUNT_ID=your-account-id
+supabase secrets set MOBILE_MESSAGE_SENDER_ID=YourBusiness
 ```
 
 ### 4. Schedule Edge Functions (Cron Jobs)

@@ -77,7 +77,7 @@ cleanbuz-app/
 │   │   │   └── callback/
 │   │   │       └── route.ts
 │   │   └── webhooks/
-│   │       └── twilio/
+│   │       └── mobilemessage/
 │   │           └── route.ts
 │   ├── layout.tsx
 │   └── page.tsx

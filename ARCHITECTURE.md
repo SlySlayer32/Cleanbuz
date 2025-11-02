@@ -25,7 +25,7 @@ Cleanbuz is a full-stack task management application designed for property manag
   - Storage for attachments
 
 **External Services:**
-- Twilio SMS API (notifications)
+- Mobile Message SMS API (notifications)
 - Airbnb iCal feeds (booking sync)
 
 ## Architecture Diagram
@@ -64,7 +64,7 @@ Cleanbuz is a full-stack task management application designed for property manag
               │                            │
               ▼                            ▼
     ┌──────────────────┐        ┌──────────────────┐
-    │  Airbnb iCal     │        │   Twilio SMS     │
+    │  Airbnb iCal     │        │   Mobile Message SMS     │
     │  Booking Feeds   │        │   Notifications  │
     └──────────────────┘        └──────────────────┘
 ```
@@ -156,7 +156,7 @@ Cleanbuz is a full-stack task management application designed for property manag
 
 ### 6. Notification System
 
-**Twilio SMS Integration:**
+**Mobile Message SMS Integration:**
 - Daily task digests (morning)
 - Urgent task alerts
 - Booking reminders
@@ -186,7 +186,7 @@ Airbnb → iCal Feed → Edge Function → Parse → Database
                                               ↓
                                     Generate Tasks
                                               ↓
-                                    Notify Users (Twilio)
+                                    Notify Users (Mobile Message)
 ```
 
 ### Task Management Flow
@@ -305,7 +305,7 @@ User Action → Next.js → Supabase API → Database
 - ~$20/month
 - Additional for bandwidth and build time
 
-### Twilio SMS
+### Mobile Message SMS
 - ~$0.0075 per SMS
 - Estimate: 100 users × 30 days × 2 SMS/day = ~$45/month
 
@@ -319,7 +319,7 @@ User Action → Next.js → Supabase API → Database
 4. Develop authentication flows
 5. Create Edge Functions
 6. Build frontend components
-7. Integrate Twilio SMS
+7. Integrate Mobile Message SMS
 8. Implement iCal sync
 9. Add real-time features
 10. Deploy to production
@@ -329,6 +329,6 @@ User Action → Next.js → Supabase API → Database
 
 - [Supabase Documentation](https://supabase.com/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
-- [Twilio SMS API](https://www.twilio.com/docs/sms)
+- [Mobile Message SMS API](https://www.mobilemessage.com.au/docs)
 - [iCalendar RFC 5545](https://tools.ietf.org/html/rfc5545)
 - [PWA Guidelines](https://web.dev/progressive-web-apps/)

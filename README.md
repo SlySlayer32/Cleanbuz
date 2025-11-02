@@ -9,7 +9,7 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 - 🏠 **Property Management** - Manage multiple properties and team members
 - 📅 **Airbnb Integration** - Automatic booking sync via iCal feeds from Airbnb, VRBO, Booking.com
 - ✅ **Task Management** - Create, assign, and track tasks with real-time updates
-- 📱 **SMS Notifications** - Daily digests and task reminders via Twilio
+- 📱 **SMS Notifications** - Daily digests and task reminders via Mobile Message
 - 🔐 **Multi-Auth** - Phone OTP, Email/Password, and OAuth (Google, Apple)
 - 🔄 **Real-time Updates** - Instant synchronization across all devices
 - 📊 **PWA Support** - Works offline and installable on mobile devices
@@ -31,7 +31,7 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
   - Edge Functions (Deno runtime)
   - Realtime subscriptions
   - Storage for file uploads
-- **Twilio** - SMS notifications
+- **Mobile Message** - SMS notifications
 - **iCal/RFC 5545** - Calendar feed parsing
 
 ### Deployment
@@ -54,7 +54,7 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 
 ### Integrations
 - **[ICAL_INTEGRATION.md](ICAL_INTEGRATION.md)** - Airbnb/VRBO booking sync via iCal
-- **[TWILIO_SMS.md](TWILIO_SMS.md)** - SMS notification implementation
+- **[MOBILE_MESSAGE_SMS.md](MOBILE_MESSAGE_SMS.md)** - SMS notification implementation
 
 ### Frontend Development
 - **[NEXTJS_FRONTEND.md](NEXTJS_FRONTEND.md)** - Next.js PWA development guide
@@ -94,10 +94,10 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Twilio
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
+# Mobile Message
+MOBILE_MESSAGE_API_KEY=your-api-key-here
+MOBILE_MESSAGE_ACCOUNT_ID=your-account-id
+MOBILE_MESSAGE_SENDER_ID=YourBusiness
 
 # Optional: OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -134,7 +134,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
               │                            │
               ▼                            ▼
     ┌──────────────────┐        ┌──────────────────┐
-    │  Airbnb iCal     │        │   Twilio SMS     │
+    │  Airbnb iCal     │        │   Mobile Message SMS     │
     │  Booking Feeds   │        │   Notifications  │
     └──────────────────┘        └──────────────────┘
 ```
@@ -263,7 +263,7 @@ See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for complete schema with RLS polici
 
 - **Supabase Pro**: $25 (includes database, auth, storage)
 - **Vercel Pro**: $20 (includes hosting, edge functions)
-- **Twilio SMS**: $45 (estimate for 100 users, 2 SMS/day)
+- **Mobile Message SMS**: $45 (estimate for 100 users, 2 SMS/day)
 - **Total**: ~$100-150/month for up to 100 active users
 
 ## Roadmap
@@ -296,7 +296,7 @@ MIT License - see LICENSE file for details
 - [Supabase](https://supabase.com) - Backend infrastructure
 - [Next.js](https://nextjs.org) - React framework
 - [Vercel](https://vercel.com) - Deployment platform
-- [Twilio](https://twilio.com) - SMS service
+- [Mobile Message](https://www.mobilemessage.com.au) - SMS service
 - [Tailwind CSS](https://tailwindcss.com) - Styling framework
 
 ---

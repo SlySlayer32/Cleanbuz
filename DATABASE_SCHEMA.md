@@ -414,14 +414,14 @@ CREATE TABLE public.notifications (
   type TEXT NOT NULL CHECK (
     type IN ('sms', 'email', 'push', 'in_app')
   ),
-  channel TEXT NOT NULL, -- e.g., 'twilio', 'sendgrid', 'fcm'
+  channel TEXT NOT NULL, -- e.g., 'mobilemessage', 'sendgrid', 'fcm'
   recipient TEXT NOT NULL, -- phone number or email
   subject TEXT,
   message TEXT NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (
     status IN ('pending', 'sent', 'delivered', 'failed', 'bounced')
   ),
-  external_id TEXT, -- Twilio message SID, etc.
+  external_id TEXT, -- Mobile Message message SID, etc.
   error_message TEXT,
   metadata JSONB DEFAULT '{}'::jsonb,
   sent_at TIMESTAMPTZ,

@@ -126,7 +126,7 @@ export const config = {
 ### Implementation Flow
 
 1. User enters phone number
-2. Send OTP via SMS (Twilio)
+2. Send OTP via SMS (Mobile Message)
 3. User enters OTP code
 4. Verify OTP and create session
 5. Create/update user profile
@@ -918,7 +918,7 @@ test('phone authentication flow', async ({ page }) => {
 ### Common Issues
 
 1. **OTP not received**
-   - Check Twilio configuration
+   - Check Mobile Message configuration
    - Verify phone number format (E.164)
    - Check rate limits
 

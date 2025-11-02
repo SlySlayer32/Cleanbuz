@@ -10,7 +10,7 @@ This comprehensive guide will walk you through building the Cleanbuz task manage
 - Git installed
 - GitHub account
 - Supabase account (free tier available)
-- Twilio account (with trial credits)
+- Mobile Message account (with trial credits)
 - Vercel account (free tier available)
 - Basic knowledge of TypeScript, React, and SQL
 
@@ -23,7 +23,7 @@ npx create-next-app@latest cleanbuz-app --typescript --tailwind --app
 # 2. Install dependencies
 cd cleanbuz-app
 npm install @supabase/supabase-js @supabase/auth-helpers-nextjs
-npm install @tanstack/react-query twilio date-fns
+npm install @tanstack/react-query mobilemessage date-fns
 
 # 3. Set up environment variables
 cp .env.example .env.local
@@ -67,8 +67,8 @@ npm install react-hook-form zod @hookform/resolvers
 # Utilities
 npm install date-fns clsx tailwind-merge lucide-react
 
-# SMS notifications
-npm install twilio
+# SMS notifications (Mobile Message uses REST API via axios)
+npm install axios
 
 # iCal parsing
 npm install node-ical
@@ -82,7 +82,7 @@ npm install next-pwa
 ```bash
 mkdir -p src/{components,lib,hooks,types}
 mkdir -p src/components/{auth,tasks,bookings,calendar,layout,ui}
-mkdir -p src/lib/{supabase,twilio,utils}
+mkdir -p src/lib/{supabase,mobilemessage,utils}
 ```
 
 ### Phase 2: Supabase Setup
@@ -130,8 +130,8 @@ In Supabase Dashboard → Authentication → Providers:
 
 **Enable Phone (SMS):**
 1. Toggle "Phone" to enabled
-2. Select provider: Twilio
-3. Enter Twilio credentials:
+2. Select provider: Mobile Message
+3. Enter Mobile Message credentials:
    - Account SID
    - Auth Token
    - Phone Number
@@ -159,10 +159,10 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 
-# Twilio
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
+# Mobile Message
+MOBILE_MESSAGE_API_KEY=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+MOBILE_MESSAGE_ACCOUNT_ID=your-auth-token
+MOBILE_MESSAGE_SENDER_ID=+1234567890
 
 # Optional: OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -269,9 +269,9 @@ Create `supabase/functions/sync-ical-bookings/index.ts`:
 
 ```bash
 # Set secrets
-supabase secrets set TWILIO_ACCOUNT_SID=your-sid
-supabase secrets set TWILIO_AUTH_TOKEN=your-token
-supabase secrets set TWILIO_PHONE_NUMBER=your-number
+supabase secrets set MOBILE_MESSAGE_API_KEY=your-sid
+supabase secrets set MOBILE_MESSAGE_ACCOUNT_ID=your-token
+supabase secrets set MOBILE_MESSAGE_SENDER_ID=your-number
 
 # Deploy functions
 supabase functions deploy sync-ical-bookings
@@ -312,14 +312,14 @@ Create `src/hooks/useTasksRealtime.ts`:
 // Copy from REALTIME_UPDATES.md
 ```
 
-### Phase 7: Integrate Twilio SMS
+### Phase 7: Integrate Mobile Message SMS
 
-#### 1. Set Up Twilio Client
+#### 1. Set Up Mobile Message Client
 
-Create `src/lib/twilio/client.ts`:
+Create `src/lib/mobilemessage/client.ts`:
 
 ```typescript
-// Copy from TWILIO_SMS.md
+// Copy from MOBILE_MESSAGE_SMS.md
 ```
 
 #### 2. Create Notification Service
@@ -327,7 +327,7 @@ Create `src/lib/twilio/client.ts`:
 Create `src/lib/notifications/sms-service.ts`:
 
 ```typescript
-// Copy from TWILIO_SMS.md
+// Copy from MOBILE_MESSAGE_SMS.md
 ```
 
 #### 3. Create Message Templates
@@ -335,7 +335,7 @@ Create `src/lib/notifications/sms-service.ts`:
 Create `src/lib/notifications/templates.ts`:
 
 ```typescript
-// Copy from TWILIO_SMS.md
+// Copy from MOBILE_MESSAGE_SMS.md
 ```
 
 ### Phase 8: PWA Configuration
@@ -520,10 +520,10 @@ Check `middleware.ts` configuration and ensure redirect URLs are correct in Supa
 ### Issue: SMS not sending
 
 **Solution:**
-1. Verify Twilio credentials
+1. Verify Mobile Message credentials
 2. Check phone number format (E.164)
-3. Ensure sufficient Twilio balance
-4. Check Twilio console for error logs
+3. Ensure sufficient Mobile Message balance
+4. Check Mobile Message console for error logs
 
 ### Issue: iCal sync failing
 
@@ -560,13 +560,13 @@ Check `middleware.ts` configuration and ensure redirect URLs are correct in Supa
 ### Documentation
 - [Supabase Docs](https://supabase.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
-- [Twilio Docs](https://www.twilio.com/docs)
+- [Mobile Message Docs](https://www.mobilemessage.com.au/docs)
 - [Vercel Docs](https://vercel.com/docs)
 
 ### Support
 - [Supabase Discord](https://discord.supabase.com)
 - [Next.js Discord](https://nextjs.org/discord)
-- [Twilio Support](https://support.twilio.com)
+- [Mobile Message Support](https://www.mobilemessage.com.au/support)
 
 ### Learning Resources
 - [Supabase YouTube](https://www.youtube.com/c/supabase)
@@ -588,7 +588,7 @@ For additional help, refer to specific documentation files:
 - `DATABASE_SCHEMA.md` - Database structure
 - `SUPABASE_SETUP.md` - Supabase configuration
 - `AUTHENTICATION.md` - Auth implementation
-- `TWILIO_SMS.md` - SMS integration
+- `MOBILE_MESSAGE_SMS.md` - SMS integration
 - `ICAL_INTEGRATION.md` - Booking sync
 - `VERCEL_DEPLOYMENT.md` - Deployment guide
 - `SECURITY_BEST_PRACTICES.md` - Security measures

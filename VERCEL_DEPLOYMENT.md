@@ -9,7 +9,7 @@ This guide covers deploying the Cleanbuz Next.js application to Vercel with opti
 - Vercel account (free tier available)
 - GitHub repository with Next.js application
 - Supabase project configured
-- Twilio account configured
+- Mobile Message account configured
 
 ## Initial Setup
 
@@ -62,10 +62,10 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
 NODE_ENV=production
 
-# Twilio
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
+# Mobile Message
+MOBILE_MESSAGE_API_KEY=your-api-key-here
+MOBILE_MESSAGE_ACCOUNT_ID=your-account-id
+MOBILE_MESSAGE_SENDER_ID=YourBusiness
 
 # OAuth (if using)
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -110,9 +110,9 @@ vercel link
 vercel env add NEXT_PUBLIC_SUPABASE_URL production
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
 vercel env add SUPABASE_SERVICE_ROLE_KEY production
-vercel env add TWILIO_ACCOUNT_SID production
-vercel env add TWILIO_AUTH_TOKEN production
-vercel env add TWILIO_PHONE_NUMBER production
+vercel env add MOBILE_MESSAGE_API_KEY production
+vercel env add MOBILE_MESSAGE_ACCOUNT_ID production
+vercel env add MOBILE_MESSAGE_SENDER_ID production
 
 # Deploy to production
 vercel --prod
