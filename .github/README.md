@@ -12,6 +12,14 @@ This directory contains configuration files for GitHub features and GitHub Copil
   - Security requirements
   - Testing strategies
   - Reference to all documentation files
+  - **GitHub Copilot Coding Agent Best Practices** *(Updated with official guidance)*
+    - Creating well-scoped issues for Copilot
+    - Task appropriateness (what Copilot should/shouldn't handle)
+    - PR review guidelines and iteration workflows
+    - Security considerations for AI-generated code
+    - Custom agent configuration (advanced)
+  
+  > Based on official GitHub best practices from [gh.io/copilot-coding-agent-tips](https://docs.github.com/en/copilot/tutorials/coding-agent/get-the-best-results)
 
 ### Workflow Files (`workflows/`)
 Automated CI/CD pipelines for the project:

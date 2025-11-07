@@ -81,6 +81,78 @@ npm test
 npm run dev
 ```
 
+## 📋 Working with Copilot Coding Agent
+
+### Creating Issues for Copilot
+
+**Best Practices for Issue Creation:**
+When creating GitHub Issues for Copilot to work on, follow these guidelines:
+
+1. **Be Specific**: Clearly describe what needs to be done
+2. **Provide Context**: Reference relevant files and documentation
+3. **Set Boundaries**: Focus on one clear task per issue
+4. **Define Success**: Include acceptance criteria
+5. **Assign to Copilot**: Use GitHub's assignment feature
+
+**Example Well-Scoped Issue:**
+```markdown
+Title: Add loading skeleton to TaskCard component
+
+Description:
+The TaskCard component needs a loading state for better UX.
+
+Changes needed:
+- Add loading prop to TaskCard component (src/components/tasks/TaskCard.tsx)
+- Display skeleton loader when loading=true
+- Use Tailwind CSS for skeleton animation
+- Maintain existing TypeScript interfaces
+
+Acceptance Criteria:
+- Component shows skeleton when loading
+- No layout shift when content loads
+- Matches existing design system
+- TypeScript types are properly defined
+
+Reference: See LoadingSpinner in src/components/ui/ for patterns
+```
+
+**Good Tasks for Copilot:**
+- ✅ Bug fixes with clear reproduction steps
+- ✅ Adding tests for existing code
+- ✅ Creating components based on patterns
+- ✅ Implementing defined API routes
+- ✅ Adding TypeScript types
+- ✅ Documentation updates
+- ✅ UI improvements with specs
+
+**Tasks Requiring Manual Work:**
+- ❌ Major architectural changes
+- ❌ Security-critical authentication logic
+- ❌ Complex business logic
+- ❌ Cross-service coordination
+- ❌ Critical production hotfixes
+
+### Reviewing Copilot's Pull Requests
+
+**Review Checklist:**
+- [ ] Code follows project standards
+- [ ] TypeScript types properly defined
+- [ ] Error handling included
+- [ ] Security considerations addressed
+- [ ] Tests included or updated
+- [ ] Documentation updated if needed
+- [ ] No obvious performance issues
+
+**Providing Feedback:**
+Use `@copilot` in PR comments for iterations:
+```markdown
+@copilot Please add error handling for this API call.
+@copilot Use the Task interface from src/types/ instead.
+@copilot Can you add tests for the edge cases?
+```
+
+**See Also:** `.github/copilot-instructions.md` includes a comprehensive "GitHub Copilot Coding Agent Best Practices" section with detailed guidance on working with Copilot.
+
 ## 📋 Using Templates
 
 ### Creating Issues

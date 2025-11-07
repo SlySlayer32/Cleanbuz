@@ -546,4 +546,188 @@ For questions or issues:
 
 ---
 
+## GitHub Copilot Coding Agent Best Practices
+
+### Working with Copilot on Issues
+
+**Creating Well-Scoped Issues for Copilot:**
+When creating issues for Copilot to work on, ensure they are:
+- **Specific and Clear**: Provide exact details about what needs to be changed
+- **Well-Bounded**: Focus on a single feature, bug fix, or improvement
+- **File-Referenced**: Mention which files or directories should be modified
+- **Acceptance Criteria**: Include clear success criteria or expected outcomes
+- **Context-Rich**: Reference relevant documentation files in this repository
+
+**Example of a Well-Scoped Issue:**
+```markdown
+Title: Add loading state to TaskCard component
+
+Description:
+Update the TaskCard component in src/components/tasks/TaskCard.tsx to:
+- Add a loading skeleton when task data is being fetched
+- Use the existing LoadingSpinner from src/components/ui/
+- Maintain current TypeScript types
+- Follow the component structure pattern
+
+Acceptance Criteria:
+- Loading state displays while data is fetching
+- No TypeScript errors
+- Consistent with existing UI patterns
+- Works with React Query loading states
+
+Files to modify:
+- src/components/tasks/TaskCard.tsx
+```
+
+### Appropriate Tasks for Copilot
+
+**✅ Good Tasks for Copilot:**
+- Fixing bugs with clear reproduction steps
+- Adding tests for existing functionality
+- Updating documentation
+- Creating new components based on existing patterns
+- Refactoring isolated modules or functions
+- Implementing well-defined API routes
+- Adding TypeScript types and interfaces
+- UI improvements with specific requirements
+- Performance optimizations for specific functions
+- Adding error handling to existing code
+
+**❌ Tasks to Handle Manually:**
+- Major architectural changes or redesigns
+- Security-critical authentication/authorization logic
+- Payment processing or financial transactions
+- Cross-repository or multi-service coordination
+- Complex business logic requiring deep domain knowledge
+- Breaking changes affecting multiple systems
+- Initial project setup or scaffold generation
+- Critical production hotfixes requiring immediate deployment
+
+### Reviewing Copilot's Pull Requests
+
+**Review Checklist:**
+1. **Code Quality**
+   - Does it follow the project's coding standards?
+   - Are TypeScript types properly defined?
+   - Is error handling comprehensive?
+   - Does it match existing patterns?
+
+2. **Security**
+   - Are inputs properly validated?
+   - Are RLS policies maintained for database operations?
+   - Are secrets or sensitive data properly handled?
+   - Is authentication/authorization checked?
+
+3. **Testing**
+   - Are tests included or updated?
+   - Do existing tests still pass?
+   - Are edge cases considered?
+
+4. **Documentation**
+   - Are code comments added where necessary?
+   - Is documentation updated if behavior changes?
+   - Are API changes documented?
+
+5. **Performance**
+   - Are there any obvious performance issues?
+   - Are database queries optimized?
+   - Is unnecessary re-rendering avoided?
+
+**Providing Feedback:**
+Use `@copilot` mentions in PR comments to request changes or clarifications:
+```markdown
+@copilot Please add error handling for network failures in this function.
+
+@copilot The TypeScript types here should use the Task interface from src/types/task.ts instead.
+
+@copilot Can you add unit tests for this new utility function?
+```
+
+### Iterative Collaboration
+
+**Working with Copilot Iteratively:**
+1. **Start Simple**: Begin with clear, focused tasks
+2. **Review Early**: Check Copilot's PRs quickly and provide feedback
+3. **Iterate**: Request improvements or refinements through comments
+4. **Merge When Ready**: Only merge after thorough validation
+5. **Learn Patterns**: Observe what works well and refine future issue descriptions
+
+**Communication Tips:**
+- Be specific about what needs to change
+- Reference exact file paths and line numbers when possible
+- Point to existing patterns or examples in the codebase
+- Explain the "why" behind requested changes
+- Ask for clarification if Copilot's approach is unclear
+
+### Security Considerations for AI-Generated Code
+
+**Critical Security Areas (Require Extra Review):**
+- Authentication and session management
+- Authorization checks and RLS policies
+- Input validation and sanitization
+- Database queries (SQL injection prevention)
+- API endpoint security
+- Environment variable handling
+- Password and credential management
+- File upload and processing
+- CORS and security headers
+- Rate limiting implementation
+
+**Always Manually Review:**
+- Any code touching user authentication
+- Database migration files
+- Changes to RLS policies
+- API routes handling sensitive data
+- Payment or financial logic
+- User permission checks
+- Third-party API integrations with credentials
+
+### Custom Agents (Advanced)
+
+For specialized, recurring tasks, you can define custom agents in `.github/agents/` directory:
+
+**Example Agent Structure:**
+```markdown
+# .github/agents/test-writer.md
+
+## Agent Purpose
+Specialized in writing comprehensive unit and integration tests.
+
+## Instructions
+When assigned test-writing tasks:
+1. Use Jest for unit tests
+2. Use React Testing Library for component tests
+3. Follow existing test patterns in __tests__/ directories
+4. Aim for >80% code coverage
+5. Include edge cases and error scenarios
+6. Mock external dependencies (Supabase, APIs)
+
+## Expertise Areas
+- React component testing
+- API route testing
+- Database query mocking
+- Async function testing
+```
+
+### Repository-Specific Guidance
+
+**For Non-Technical Founders:**
+- Copilot works best with clear, specific requests
+- Start with small, low-risk tasks to build confidence
+- Always review and test changes before merging
+- Use the issue templates in .github/ISSUE_TEMPLATE/
+- Leverage the CI/CD workflows to catch issues early
+- Don't hesitate to ask Copilot for clarifications or improvements
+
+**Continuous Improvement:**
+- Monitor which types of tasks Copilot handles well
+- Refine issue descriptions based on outcomes
+- Update these instructions with new patterns and learnings
+- Maintain clear documentation for better AI context
+- Keep the codebase consistent for better AI predictions
+
+---
+
 **Remember**: This is a production application handling real user data. Always prioritize security, reliability, and user experience in all code decisions. When in doubt, refer to the comprehensive documentation files in this repository.
+
+**For Copilot Coding Agent**: Treat every task as an opportunity to deliver production-quality code. Follow all guidelines strictly, ask for clarification when requirements are ambiguous, and never compromise on security or data integrity.

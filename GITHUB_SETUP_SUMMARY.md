@@ -21,8 +21,15 @@ This is the primary file that GitHub Copilot reads to understand your project. I
 - **Common Patterns**: Reusable code patterns for Supabase, React Query, error handling
 - **Integration Guidelines**: How to work with Mobile Message SMS and iCal feeds
 - **Troubleshooting**: Common issues and solutions
+- **GitHub Copilot Coding Agent Best Practices** *(NEW)*:
+  - Creating well-scoped issues for Copilot
+  - Appropriate vs. inappropriate tasks for AI
+  - Reviewing Copilot's pull requests
+  - Iterative collaboration workflows
+  - Security considerations for AI-generated code
+  - Custom agent configuration guidance
 
-**Size**: ~17KB of comprehensive, AI-readable instructions
+**Size**: ~20KB of comprehensive, AI-readable instructions
 
 ### 2. CI/CD Workflows
 
