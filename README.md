@@ -1,5 +1,7 @@
 # Cleanbuz - Task Management App with Airbnb Integration
 
+> **🤖 AI-Ready Development**: This project includes comprehensive AI-readable instructions for GitHub Copilot and other AI coding assistants. Perfect for non-technical founders! See [COPILOT_QUICK_START.md](COPILOT_QUICK_START.md) to get started with AI-driven development.
+
 ## Overview
 
 Cleanbuz is a comprehensive full-stack task management application designed for property managers, with seamless integration to Airbnb bookings via iCal feeds. The system automatically generates cleaning and maintenance tasks based on booking schedules and sends personalized SMS notifications to team members.
@@ -42,6 +44,11 @@ Cleanbuz is a comprehensive full-stack task management application designed for 
 - **Supabase Cloud** - Database and backend services
 
 ## Documentation
+
+### 🚀 AI Development (NEW)
+- **[COPILOT_QUICK_START.md](COPILOT_QUICK_START.md)** - Quick start guide for using GitHub Copilot and AI tools
+- **[GITHUB_SETUP_SUMMARY.md](GITHUB_SETUP_SUMMARY.md)** - Complete guide to GitHub configuration and workflows
+- **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - AI-readable instructions for Copilot (auto-loaded)
 
 ### Getting Started
 

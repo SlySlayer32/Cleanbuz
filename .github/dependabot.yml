@@ -1,0 +1,82 @@
+---
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "SlySlayer32"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    
+    # Group dependency updates
+    groups:
+      # Group all Supabase packages together
+      supabase:
+        patterns:
+          - "@supabase/*"
+      
+      # Group React and Next.js together
+      react-framework:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+      
+      # Group testing libraries
+      testing:
+        patterns:
+          - "jest"
+          - "@testing-library/*"
+          - "vitest"
+      
+      # Group TypeScript related packages
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+      
+      # Group development dependencies
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Ignore specific dependencies or versions
+    ignore:
+      # Ignore major version updates for stable packages
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+    
+    # Security updates
+    versioning-strategy: increase
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "SlySlayer32"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
