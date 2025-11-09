@@ -132,10 +132,10 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+        uses: vercel/action@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+          token: ${{ secrets.VERCEL_TOKEN }}
+          org-id: ${{ secrets.VERCEL_ORG_ID }}
+          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          args: '--prod'
           working-directory: ./
