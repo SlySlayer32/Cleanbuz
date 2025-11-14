@@ -194,17 +194,18 @@ The project uses several automated workflows:
   - Building the application
   - Security scanning
 
-- **Branch Cleanup** - Runs weekly
+- **Branch Cleanup** *(planned)* - Intended to run weekly
   - Identifies stale branches (30+ days)
   - Creates cleanup reports
   - Auto-deletes very old branches (60+ days)
 
-- **Dependabot Auto-Merge** - Handles dependency updates
+- **Dependabot Auto-Merge** *(planned)* - Intended to handle dependency updates
   - Auto-merges patch/minor updates with passing CI
   - Flags major updates for manual review
   - Groups related dependencies
 
-See [.github/workflows/](../.github/workflows/) for workflow configurations.
+See [.github/workflows/](../.github/workflows/) for current workflow configurations.  
+*Note: Some workflows described above may be planned and not yet implemented. If a workflow file is missing, it is pending addition.*
 
 ## Environment Variables
 
