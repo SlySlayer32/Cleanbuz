@@ -89,7 +89,7 @@ export interface Database {
           state?: string | null;
           zip_code?: string | null;
           country?: string;
-          property_type?: 'apartment' | 'house' | 'condo' | 'villa' | 'studio';
+          property_type?: 'apartment' | 'house' | 'condo' | 'villa' | 'studio'; // Defaults to 'apartment'
           bedrooms?: number;
           bathrooms?: number;
           square_feet?: number | null;
