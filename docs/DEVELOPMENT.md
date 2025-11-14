@@ -103,31 +103,108 @@ Cleanbuz/
 
 ## Development Workflow
 
-1. Create a new branch for your feature:
+### Branch Management
+
+The project follows a structured branch management strategy to maintain code quality and organization. See [.github/BRANCH_MANAGEMENT.md](../.github/BRANCH_MANAGEMENT.md) for complete details.
+
+#### Creating a Branch
+
+1. Always branch from `main`:
 
 ```bash
+git checkout main
+git pull origin main
 git checkout -b feature/your-feature-name
 ```
 
-2. Make your changes following the code style
+2. Use appropriate branch prefixes:
+   - `feature/` - New features
+   - `bugfix/` - Bug fixes
+   - `hotfix/` - Urgent production fixes
+   - `refactor/` - Code refactoring
+   - `docs/` - Documentation updates
+   - `chore/` - Maintenance tasks
 
-3. Run linting and type checks:
+#### Working on Your Branch
+
+1. Make your changes following the code style
+
+2. Commit frequently with clear, descriptive messages:
+
+```bash
+git add .
+git commit -m "feat(auth): add phone OTP authentication"
+```
+
+3. Follow conventional commit format:
+   - `feat:` - New feature
+   - `fix:` - Bug fix
+   - `docs:` - Documentation changes
+   - `style:` - Formatting changes
+   - `refactor:` - Code refactoring
+   - `test:` - Adding tests
+   - `chore:` - Maintenance
+
+4. Run quality checks before pushing:
 
 ```bash
 npm run lint
 npm run type-check
 npm run format:check
-```
-
-4. Build to ensure no errors:
-
-```bash
 npm run build
 ```
 
-5. Commit your changes with a clear message
+5. Push your branch regularly:
 
-6. Push and create a pull request
+```bash
+git push origin feature/your-feature-name
+```
+
+#### Creating a Pull Request
+
+1. Push your branch to GitHub
+2. Open a Pull Request to `main`
+3. Fill out the PR template completely
+4. Link related issues (e.g., "Closes #123")
+5. Request reviewers
+6. Wait for CI checks to pass
+7. Address review feedback if any
+8. Merge when approved (branch will be auto-deleted)
+
+#### Keeping Your Branch Updated
+
+Regularly merge or rebase from main to avoid conflicts:
+
+```bash
+git checkout main
+git pull origin main
+git checkout feature/your-feature-name
+git merge main
+# Or use rebase for cleaner history:
+# git rebase main
+```
+
+### Automated Workflows
+
+The project uses several automated workflows:
+
+- **CI/CD Pipeline** - Runs on every push and PR
+  - Linting and type checking
+  - Running tests
+  - Building the application
+  - Security scanning
+
+- **Branch Cleanup** - Runs weekly
+  - Identifies stale branches (30+ days)
+  - Creates cleanup reports
+  - Auto-deletes very old branches (60+ days)
+
+- **Dependabot Auto-Merge** - Handles dependency updates
+  - Auto-merges patch/minor updates with passing CI
+  - Flags major updates for manual review
+  - Groups related dependencies
+
+See [.github/workflows/](../.github/workflows/) for workflow configurations.
 
 ## Environment Variables
 
