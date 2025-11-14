@@ -121,11 +121,11 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### 1.3 Database Schema Implementation 🔄 IN PROGRESS
+### 1.3 Database Schema Implementation ⏳ NEXT
 
 **Priority: P0 | Estimate: L | Dependencies: 1.2 ✅**
 
-**Status:** ⏳ Ready to start - Next phase in development
+**Status:** Planned - Next phase in development
 
 **Tasks:**
 
@@ -160,7 +160,7 @@ NEXT_PUBLIC_APP_URL=
 
 ### 1.4 Row Level Security (RLS) Policies
 
-**Priority: P0 | Estimate: L | Dependencies: 1.3 (Not Started)**
+**Priority: P0 | Estimate: L | Dependencies: 1.3 (Planned)**
 
 **Tasks:**
 
