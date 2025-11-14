@@ -105,7 +105,7 @@ Cleanbuz/
 
 ### Branch Management
 
-The project follows a structured branch management strategy to maintain code quality and organization. See [.github/BRANCH_MANAGEMENT.md](../.github/BRANCH_MANAGEMENT.md) for complete details.
+The project follows a structured branch management strategy to maintain code quality and organization. Feature branches should be created from `main` using descriptive names (e.g., `feature/your-feature-name`), and all changes should be merged via pull requests after code review.
 
 #### Creating a Branch
 
