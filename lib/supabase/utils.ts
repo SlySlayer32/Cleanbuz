@@ -63,7 +63,7 @@ export async function hasRole(
 export async function isAdmin(
   supabase: SupabaseClient<Database>,
   userId: string
-) {
+): Promise<boolean> {
   return hasRole(supabase, userId, 'admin');
 }
 
