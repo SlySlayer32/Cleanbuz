@@ -88,7 +88,7 @@ export interface Database {
           city?: string | null;
           state?: string | null;
           zip_code?: string | null;
-          country?: string;
+          country?: string; // Defaults to 'US'
           property_type?: 'apartment' | 'house' | 'condo' | 'villa' | 'studio'; // Defaults to 'apartment'
           bedrooms?: number; // Defaults to 1
           bathrooms?: number; // Defaults to 1

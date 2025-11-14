@@ -89,9 +89,10 @@ export function checkSupabaseConfig(): {
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
   ];
 
-  const missingVars = requiredVars.filter(
-    (varName) => !process.env[varName] || process.env[varName] === 'your-project-ref.supabase.co' || process.env[varName]?.includes('your-')
-  );
+  const missingVars = requiredVars.filter((varName) => {
+    const value = process.env[varName];
+    return !value || value === 'your-project-ref.supabase.co' || value.includes('your-');
+  });
 
   return {
     isConfigured: missingVars.length === 0,
