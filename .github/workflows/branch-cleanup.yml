@@ -1,0 +1,331 @@
+---
+name: Branch Cleanup
+
+on:
+  # Run weekly on Sundays at 00:00 UTC
+  schedule:
+    - cron: '0 0 * * 0'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+  
+  # Run when PRs are closed
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Delete branch immediately after PR merge
+  delete-merged-branch:
+    name: Delete Merged Branch
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    
+    steps:
+      - name: Delete merged branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const isProtected = ['main', 'develop', 'master'].includes(branchName);
+            
+            if (isProtected) {
+              console.log(`Branch ${branchName} is protected, skipping deletion`);
+              return;
+            }
+            
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branchName}`
+              });
+              console.log(`Successfully deleted branch: ${branchName}`);
+            } catch (error) {
+              console.log(`Failed to delete branch ${branchName}: ${error.message}`);
+            }
+
+  # Identify and report stale branches
+  identify-stale-branches:
+    name: Identify Stale Branches
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - name: Identify stale branches
+        id: stale-branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const daysStale = 30;
+            const protectedBranches = ['main', 'develop', 'master'];
+            const staleDate = new Date();
+            staleDate.setDate(staleDate.getDate() - daysStale);
+            
+            // Get all branches
+            const { data: branches } = await github.rest.repos.listBranches({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            const staleBranches = [];
+            
+            for (const branch of branches) {
+              // Skip protected branches
+              if (protectedBranches.includes(branch.name)) {
+                continue;
+              }
+              
+              // Get branch details
+              const { data: branchData } = await github.rest.repos.getBranch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: branch.name
+              });
+              
+              const lastCommitDate = new Date(branchData.commit.commit.committer.date);
+              
+              if (lastCommitDate < staleDate) {
+                // Check if branch has open PRs
+                const { data: prs } = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  head: `${context.repo.owner}:${branch.name}`,
+                  state: 'open'
+                });
+                
+                if (prs.length === 0) {
+                  staleBranches.push({
+                    name: branch.name,
+                    lastCommit: lastCommitDate.toISOString().split('T')[0],
+                    daysSinceLastCommit: Math.floor((Date.now() - lastCommitDate) / (1000 * 60 * 60 * 24)),
+                    author: branchData.commit.commit.committer.name
+                  });
+                }
+              }
+            }
+            
+            core.setOutput('stale_branches', JSON.stringify(staleBranches));
+            core.setOutput('stale_count', staleBranches.length);
+            
+            return staleBranches;
+      
+      - name: Create issue for stale branches
+        if: steps.stale-branches.outputs.stale_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const staleBranches = JSON.parse('${{ steps.stale-branches.outputs.stale_count }}' > 0 ? '${{ steps.stale-branches.outputs.stale_branches }}' : '[]');
+            
+            if (staleBranches.length === 0) {
+              console.log('No stale branches found');
+              return;
+            }
+            
+            // Create markdown table
+            let body = `## 🧹 Stale Branch Cleanup Report\n\n`;
+            body += `Found **${staleBranches.length}** stale branch(es) with no activity in the last 30 days and no open pull requests.\n\n`;
+            body += `### Branches Ready for Deletion\n\n`;
+            body += `| Branch Name | Last Commit | Days Inactive | Last Author |\n`;
+            body += `|-------------|-------------|---------------|-------------|\n`;
+            
+            staleBranches.forEach(branch => {
+              body += `| \`${branch.name}\` | ${branch.lastCommit} | ${branch.daysSinceLastCommit} days | ${branch.author} |\n`;
+            });
+            
+            body += `\n### Recommended Actions\n\n`;
+            body += `1. **Review each branch** to ensure it's safe to delete\n`;
+            body += `2. **Delete locally and remotely** using:\n`;
+            body += `   \`\`\`bash\n`;
+            body += `   git push origin --delete branch-name\n`;
+            body += `   \`\`\`\n`;
+            body += `3. **Close this issue** once cleanup is complete\n\n`;
+            body += `### Automatic Cleanup\n\n`;
+            body += `To enable automatic deletion of these branches, add the \`auto-delete\` label to this issue.\n\n`;
+            body += `---\n`;
+            body += `*This issue was automatically generated by the [Branch Cleanup workflow](.github/workflows/branch-cleanup.yml)*\n`;
+            body += `*Next run: ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}*`;
+            
+            // Check if issue already exists
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'branch-cleanup',
+              per_page: 1
+            });
+            
+            if (existingIssues.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssues[0].number,
+                body: body
+              });
+              console.log(`Updated existing issue #${existingIssues[0].number}`);
+            } else {
+              // Create new issue
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🧹 Stale Branch Cleanup - ${staleBranches.length} branches found`,
+                body: body,
+                labels: ['branch-cleanup', 'housekeeping']
+              });
+              console.log(`Created new issue #${issue.data.number}`);
+            }
+      
+      - name: Auto-delete stale branches if enabled
+        if: steps.stale-branches.outputs.stale_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check if auto-delete is enabled (via repository variable or config)
+            const autoDeleteEnabled = process.env.AUTO_DELETE_STALE_BRANCHES === 'true';
+            
+            if (!autoDeleteEnabled) {
+              console.log('Auto-delete is disabled. Branches were only reported.');
+              console.log('To enable auto-delete, set repository variable AUTO_DELETE_STALE_BRANCHES=true');
+              return;
+            }
+            
+            const staleBranches = JSON.parse('${{ steps.stale-branches.outputs.stale_branches }}');
+            const protectedPrefixes = ['release/', 'hotfix/', 'main', 'develop', 'master'];
+            
+            for (const branch of staleBranches) {
+              // Double-check protection
+              const isProtected = protectedPrefixes.some(prefix => 
+                branch.name.startsWith(prefix) || branch.name === prefix
+              );
+              
+              if (isProtected) {
+                console.log(`Skipping protected branch: ${branch.name}`);
+                continue;
+              }
+              
+              // Only auto-delete branches older than 60 days
+              if (branch.daysSinceLastCommit < 60) {
+                console.log(`Branch ${branch.name} is only ${branch.daysSinceLastCommit} days old, skipping auto-delete`);
+                continue;
+              }
+              
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch.name}`
+                });
+                console.log(`Auto-deleted stale branch: ${branch.name} (${branch.daysSinceLastCommit} days old)`);
+              } catch (error) {
+                console.log(`Failed to delete branch ${branch.name}: ${error.message}`);
+              }
+            }
+
+  # Clean up old workflow runs
+  cleanup-workflow-runs:
+    name: Cleanup Old Workflow Runs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Delete old workflow runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const daysToKeep = 90;
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+            
+            const { data: workflows } = await github.rest.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            let deletedCount = 0;
+            
+            for (const workflow of workflows.workflows) {
+              const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow.id,
+                per_page: 100
+              });
+              
+              for (const run of runs.workflow_runs) {
+                const runDate = new Date(run.created_at);
+                
+                if (runDate < cutoffDate && run.status === 'completed') {
+                  try {
+                    await github.rest.actions.deleteWorkflowRun({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      run_id: run.id
+                    });
+                    deletedCount++;
+                  } catch (error) {
+                    console.log(`Failed to delete run ${run.id}: ${error.message}`);
+                  }
+                }
+              }
+            }
+            
+            console.log(`Deleted ${deletedCount} workflow run(s) older than ${daysToKeep} days`);
+
+  # Report branch statistics
+  branch-statistics:
+    name: Branch Statistics
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Generate branch statistics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: branches } = await github.rest.repos.listBranches({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const stats = {
+              totalBranches: branches.length,
+              protectedBranches: branches.filter(b => 
+                ['main', 'develop', 'master'].includes(b.name)
+              ).length,
+              featureBranches: branches.filter(b => b.name.startsWith('feature/')).length,
+              dependabotBranches: branches.filter(b => b.name.startsWith('dependabot/')).length,
+              copilotBranches: branches.filter(b => b.name.startsWith('copilot/')).length,
+              openPRs: prs.length
+            };
+            
+            console.log('📊 Branch Statistics:');
+            console.log(`  Total branches: ${stats.totalBranches}`);
+            console.log(`  Protected: ${stats.protectedBranches}`);
+            console.log(`  Feature branches: ${stats.featureBranches}`);
+            console.log(`  Dependabot branches: ${stats.dependabotBranches}`);
+            console.log(`  Copilot branches: ${stats.copilotBranches}`);
+            console.log(`  Open PRs: ${stats.openPRs}`);
+            
+            // Alert if too many branches
+            if (stats.totalBranches > 20) {
+              core.warning(`High branch count detected: ${stats.totalBranches} branches. Consider cleanup.`);
+            }
